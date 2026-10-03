@@ -7,21 +7,18 @@ function FT:InitializeSettings()
     FT.settingsCategory = category
 
 
-    -- --------------------------------------------------------
-    -- Nameplate health
-    -- --------------------------------------------------------
-
-    local setting = Settings.RegisterAddOnSetting(
+    -- Show health text
+    local healthTextSetting = Settings.RegisterAddOnSetting(
         category,
         "ForeverTweaks_NameplateHealthText",
         "healthText",
         FT.db.nameplates,
         Settings.VarType.Boolean,
-        "Show remaining health on nameplates",
+        "Show health on nameplates",
         false
     )
 
-    setting:SetValueChangedCallback(function(_, value)
+    healthTextSetting:SetValueChangedCallback(function(_, value)
         if FT.Nameplates then
             FT.Nameplates:Refresh()
         end
@@ -29,8 +26,51 @@ function FT:InitializeSettings()
 
     Settings.CreateCheckbox(
         category,
-        setting,
-        "Displays the unit's remaining health directly on its nameplate."
+        healthTextSetting,
+        "Displays the unit's health directly on its nameplate."
+    )
+
+
+    -- Health format
+    local healthFormatSetting = Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_NameplateHealthFormat",
+        "healthFormat",
+        FT.db.nameplates,
+        Settings.VarType.String,
+        "Health format",
+        "remaining"
+    )
+
+    local function GetHealthFormatOptions()
+        local container = Settings.CreateControlTextContainer()
+
+        container:Add(
+            "remaining",
+            "Remaining health",
+            "Displays values such as 245, 1.3K, or 12K."
+        )
+
+        container:Add(
+            "percentage",
+            "Percentage",
+            "Displays values such as 27%."
+        )
+
+        return container:GetData()
+    end
+
+    healthFormatSetting:SetValueChangedCallback(function(_, value)
+        if FT.Nameplates then
+            FT.Nameplates:Refresh()
+        end
+    end)
+
+    Settings.CreateDropdown(
+        category,
+        healthFormatSetting,
+        GetHealthFormatOptions,
+        "Choose how health is displayed on nameplates."
     )
 
 

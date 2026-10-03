@@ -95,14 +95,26 @@ local function UpdateHealthText(unit)
         return
     end
 
-    local health = UnitHealth(unit)
+    local format = FT.db.nameplates.healthFormat
 
-    local abbreviatedHealth = AbbreviateNumbers(health)
+    if format == "percentage" then
+        local healthPercent = UnitHealthPercent(
+            unit,
+            true,
+            CurveConstants.ScaleTo100
+        )
 
-    label:SetText(abbreviatedHealth)
+        label:SetFormattedText("%.0f%%", healthPercent)
+
+    else
+        local health = UnitHealth(unit)
+        local abbreviatedHealth = AbbreviateNumbers(health)
+
+        label:SetText(abbreviatedHealth)
+    end
+
     label:Show()
 end
-
 
 -- ------------------------------------------------------------
 -- Refresh currently visible nameplates
