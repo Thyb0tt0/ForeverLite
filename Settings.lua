@@ -124,6 +124,35 @@ function FT:InitializeSettings()
         "Choose where health is displayed on the nameplate."
     )
 
+    -- --------------------------------------------------------
+    -- XP tracker
+    -- --------------------------------------------------------
+
+    local experienceEnabledSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverTweaks_ExperienceEnabled",
+            "enabled",
+            FT.db.experience,
+            Settings.VarType.Boolean,
+            "Show XP tracker",
+            false
+        )
+
+    experienceEnabledSetting:SetValueChangedCallback(
+        function(_, value)
+            if FT.Experience then
+                FT.Experience:Refresh()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        experienceEnabledSetting,
+        "Shows your session XP per hour and estimated time to level."
+    )
+
     Settings.RegisterAddOnCategory(category)
 end
 
