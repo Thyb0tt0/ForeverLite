@@ -20,6 +20,10 @@ local function InitializeDatabase()
         ForeverTweaksDB.nameplates.healthFormat = "remaining"
     end
 
+    if ForeverTweaksDB.nameplates.healthPosition == nil then
+        ForeverTweaksDB.nameplates.healthPosition = "left"
+    end
+
     FT.db = ForeverTweaksDB
 end
 

@@ -22,38 +22,59 @@ local function GetHealthLabel(unit)
         return nil
     end
 
-    -- Create the label only once for each pooled nameplate frame.
+    -- Use Blizzard's health-bar container when available.
+    -- This keeps our text above the actual health-bar texture.
+    local parent = namePlate
+
+    if namePlate.UnitFrame
+        and namePlate.UnitFrame.HealthBarsContainer then
+        parent = namePlate.UnitFrame.HealthBarsContainer
+    end
+
+    -- Create the FontString only once for this pooled nameplate.
     if not namePlate.ForeverTweaksHealthText then
-        local label = namePlate:CreateFontString(
+        local label = parent:CreateFontString(
             nil,
             "OVERLAY",
             "GameFontNormalSmall"
         )
 
-        label:SetTextColor(1, 1, 1)
+        label:SetDrawLayer("OVERLAY", 7)
 
+        label:SetTextColor(1, 1, 1)
         label:SetShadowColor(0, 0, 0, 1)
         label:SetShadowOffset(1, -1)
-
-        local anchor = namePlate
-
-        if namePlate.UnitFrame
-            and namePlate.UnitFrame.HealthBarsContainer then
-            anchor = namePlate.UnitFrame.HealthBarsContainer
-        end
-
-        label:SetPoint(
-            "CENTER",
-            anchor,
-            "CENTER",
-            0,
-            0
-        )
 
         namePlate.ForeverTweaksHealthText = label
     end
 
-    return namePlate.ForeverTweaksHealthText
+    local label = namePlate.ForeverTweaksHealthText
+
+    -- Reposition every time so changing the setting takes effect
+    -- immediately on already-visible nameplates.
+    label:ClearAllPoints()
+
+    if FT.db
+        and FT.db.nameplates.healthPosition == "center" then
+
+        label:SetPoint(
+            "CENTER",
+            parent,
+            "CENTER",
+            0,
+            0
+        )
+    else
+        label:SetPoint(
+            "LEFT",
+            parent,
+            "LEFT",
+            3,
+            0
+        )
+    end
+
+    return label
 end
 
 
@@ -104,7 +125,27 @@ local function UpdateHealthText(unit)
             CurveConstants.ScaleTo100
         )
 
-        label:SetFormattedText("%.0f%%", healthPercent)
+        label:SetFormattedText(
+            "%.0f%%",
+            healthPercent
+        )
+
+    elseif format == "both" then
+        local health = UnitHealth(unit)
+
+        local healthPercent = UnitHealthPercent(
+            unit,
+            true,
+            CurveConstants.ScaleTo100
+        )
+
+        local abbreviatedHealth = AbbreviateNumbers(health)
+
+        label:SetFormattedText(
+            "%s - %.0f%%",
+            abbreviatedHealth,
+            healthPercent
+        )
 
     else
         local health = UnitHealth(unit)
@@ -115,6 +156,7 @@ local function UpdateHealthText(unit)
 
     label:Show()
 end
+
 
 -- ------------------------------------------------------------
 -- Refresh currently visible nameplates
@@ -158,17 +200,14 @@ eventFrame:RegisterEvent("UNIT_HEALTH")
 eventFrame:SetScript("OnEvent", function(self, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
-
         UpdateHealthText(unit)
 
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         local unit = ...
-
         HideHealthText(unit)
 
     elseif event == "UNIT_HEALTH" then
         local unit = ...
-
         UpdateHealthText(unit)
     end
 end)

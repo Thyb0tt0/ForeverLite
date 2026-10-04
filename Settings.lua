@@ -57,6 +57,12 @@ function FT:InitializeSettings()
             "Displays values such as 27%."
         )
 
+        container:Add(
+            "both",
+            "Remaining health + percentage",
+            "Displays values such as 746 - 63%."
+        )
+
         return container:GetData()
     end
 
@@ -73,6 +79,50 @@ function FT:InitializeSettings()
         "Choose how health is displayed on nameplates."
     )
 
+    -- --------------------------------------------------------
+    -- Health position
+    -- --------------------------------------------------------
+
+    local healthPositionSetting = Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_NameplateHealthPosition",
+        "healthPosition",
+        FT.db.nameplates,
+        Settings.VarType.String,
+        "Health position",
+        "left"
+    )
+
+    local function GetHealthPositionOptions()
+        local container = Settings.CreateControlTextContainer()
+
+        container:Add(
+            "left",
+            "Left",
+            "Displays health on the left side of the nameplate."
+        )
+
+        container:Add(
+            "center",
+            "Center",
+            "Displays health in the center of the nameplate."
+        )
+
+        return container:GetData()
+    end
+
+    healthPositionSetting:SetValueChangedCallback(function(_, value)
+        if FT.Nameplates then
+            FT.Nameplates:Refresh()
+        end
+    end)
+
+    Settings.CreateDropdown(
+        category,
+        healthPositionSetting,
+        GetHealthPositionOptions,
+        "Choose where health is displayed on the nameplate."
+    )
 
     Settings.RegisterAddOnCategory(category)
 end
