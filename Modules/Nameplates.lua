@@ -102,11 +102,12 @@ local function UpdateHealthText(unit)
         return
     end
 
-    if not FT.db.nameplates.healthText then
+    if not IsNamePlateUnit(unit) then
         return
     end
 
-    if not IsNamePlateUnit(unit) then
+    if not FT.db.nameplates.healthText then
+        HideHealthText(unit)
         return
     end
 

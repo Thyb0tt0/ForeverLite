@@ -261,6 +261,8 @@ function Experience:Refresh()
     if not FT.db
         or not FT.db.experience.enabled then
 
+        unlocked = false
+        frame:EnableMouse(false)
         frame:Hide()
         return
     end

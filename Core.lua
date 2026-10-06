@@ -161,6 +161,10 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
         )
 
         print(
+            "|cffffff00/ft health|r - Toggle nameplate health"
+        )
+
+        print(
             "|cffffff00/ft xp|r - Toggle XP tracker"
         )
 
