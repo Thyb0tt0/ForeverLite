@@ -8,4 +8,5 @@
 Core.lua
 Modules\Nameplates.lua
 Modules\Experience.lua
+Modules\Merchant.lua
 Settings.lua

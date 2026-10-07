@@ -46,6 +46,16 @@ local function InitializeDatabase()
         ForeverTweaksDB.experience.y = 160
     end
 
+    ForeverTweaksDB.merchant = ForeverTweaksDB.merchant or {}
+
+    if ForeverTweaksDB.merchant.autoRepair == nil then
+        ForeverTweaksDB.merchant.autoRepair = false
+    end
+
+    if ForeverTweaksDB.merchant.autoSellJunk == nil then
+        ForeverTweaksDB.merchant.autoSellJunk = false
+    end
+
     FT.db = ForeverTweaksDB
 end
 

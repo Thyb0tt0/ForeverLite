@@ -147,13 +147,54 @@ function FT:InitializeSettings()
         end
     )
 
-    Settings.CreateCheckbox(
+Settings.CreateCheckbox(
+    category,
+    experienceEnabledSetting,
+    "Shows your session XP per hour and estimated time to level."
+)
+
+
+-- --------------------------------------------------------
+-- Merchant
+-- --------------------------------------------------------
+
+local autoRepairSetting =
+    Settings.RegisterAddOnSetting(
         category,
-        experienceEnabledSetting,
-        "Shows your session XP per hour and estimated time to level."
+        "ForeverTweaks_MerchantAutoRepair",
+        "autoRepair",
+        FT.db.merchant,
+        Settings.VarType.Boolean,
+        "Automatically repair equipment",
+        false
     )
 
-    Settings.RegisterAddOnCategory(category)
+Settings.CreateCheckbox(
+    category,
+    autoRepairSetting,
+    "Automatically repairs damaged equipment when visiting a repair vendor."
+)
+
+
+local autoSellJunkSetting =
+    Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_MerchantAutoSellJunk",
+        "autoSellJunk",
+        FT.db.merchant,
+        Settings.VarType.Boolean,
+        "Automatically sell junk",
+        false
+    )
+
+Settings.CreateCheckbox(
+    category,
+    autoSellJunkSetting,
+    "Automatically sells gray-quality items when visiting a merchant."
+)
+
+
+Settings.RegisterAddOnCategory(category)
 end
 
 
