@@ -15,7 +15,7 @@ local frame = CreateFrame(
     UIParent
 )
 
-frame:SetSize(200, 48)
+frame:SetSize(200, 64)
 frame:SetClampedToScreen(true)
 frame:SetMovable(true)
 frame:EnableMouse(false)
@@ -65,6 +65,22 @@ timeText:SetPoint(
 )
 
 timeText:SetJustifyH("LEFT")
+
+local elapsedText = frame:CreateFontString(
+    nil,
+    "OVERLAY",
+    "GameFontHighlight"
+)
+
+elapsedText:SetPoint(
+    "TOPLEFT",
+    timeText,
+    "BOTTOMLEFT",
+    0,
+    -3
+)
+
+elapsedText:SetJustifyH("LEFT")
 
 
 -- ------------------------------------------------------------
@@ -187,6 +203,34 @@ local function FormatTime(seconds)
     )
 end
 
+local function FormatElapsed(seconds)
+    seconds = math.floor(seconds)
+
+    local hours = math.floor(seconds / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local remainingSeconds = seconds % 60
+
+    if hours > 0 then
+        return string.format(
+            "%dh %02dm %02ds",
+            hours,
+            minutes,
+            remainingSeconds
+        )
+    elseif minutes > 0 then
+        return string.format(
+            "%dm %02ds",
+            minutes,
+            remainingSeconds
+        )
+    else
+        return string.format(
+            "%ds",
+            remainingSeconds
+        )
+    end
+end
+
 
 -- ------------------------------------------------------------
 -- Display
@@ -211,6 +255,10 @@ local function UpdateDisplay()
     if startTime then
         elapsed = GetTime() - startTime
     end
+
+    elapsedText:SetText(
+        "Session: " .. FormatElapsed(elapsed)
+    )
 
     if sessionXP <= 0 or elapsed < 10 then
         xpText:SetText("XP/hr: —")
