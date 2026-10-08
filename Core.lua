@@ -62,6 +62,24 @@ local function InitializeDatabase()
         ForeverTweaksDB.tooltips.colorPlayerClass = false
     end
 
+    ForeverTweaksDB.menu = ForeverTweaksDB.menu or {}
+
+    if ForeverTweaksDB.menu.point == nil then
+        ForeverTweaksDB.menu.point = "CENTER"
+    end
+
+    if ForeverTweaksDB.menu.relativePoint == nil then
+        ForeverTweaksDB.menu.relativePoint = "CENTER"
+    end
+
+    if ForeverTweaksDB.menu.x == nil then
+        ForeverTweaksDB.menu.x = 0
+    end
+
+    if ForeverTweaksDB.menu.y == nil then
+        ForeverTweaksDB.menu.y = 0
+    end
+
     FT.db = ForeverTweaksDB
 end
 
@@ -77,7 +95,24 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
     message = strtrim(string.lower(message or ""))
 
     if message == "" then
+        if FT.Menu then
+            FT.Menu:Toggle()
+        end
+
+    elseif message == "settings" then
         FT:OpenSettings()
+
+    elseif message == "help" then
+        print("|cff33ff99ForeverTweaks|r commands:")
+        print("|cffffff00/ft|r - Toggle addon menu")
+        print("|cffffff00/ft help|r - List of all commands")
+        print("|cffffff00/ft settings|r - Open addon settings")
+        print("|cffffff00/ft health|r - Toggle nameplate health")
+        print("|cffffff00/ft xp|r - Toggle XP tracker")
+        print("|cffffff00/ft xp reset|r - Reset XP tracker session")
+        print("|cffffff00/ft xp unlock|r - Unlock XP tracker position")
+        print("|cffffff00/ft xp lock|r - Lock XP tracker position")
+        print("|cffffff00/ft xp center|r - Reset XP tracker position")
 
     elseif message == "health" then
         local newValue =
@@ -169,35 +204,8 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
 
     else
         print(
-            "|cff33ff99ForeverTweaks|r: Unknown command."
-        )
-
-        print(
-            "|cffffff00/ft|r - Open settings"
-        )
-
-        print(
-            "|cffffff00/ft health|r - Toggle nameplate health"
-        )
-
-        print(
-            "|cffffff00/ft xp|r - Toggle XP tracker"
-        )
-
-        print(
-            "|cffffff00/ft xp reset|r - Reset XP session"
-        )
-
-        print(
-            "|cffffff00/ft xp unlock|r - Unlock XP tracker"
-        )
-
-        print(
-            "|cffffff00/ft xp lock|r - Lock XP tracker"
-        )
-
-        print(
-            "|cffffff00/ft xp center|r - Reset tracker position"
+            "|cff33ff99ForeverTweaks|r: Unknown command. "
+            .. "Use |cffffff00/ft help|r for available commands."
         )
     end
 end
@@ -219,6 +227,10 @@ eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
 
     if FT.InitializeSettings then
         FT:InitializeSettings()
+    end
+
+    if FT.Menu then
+        FT.Menu:Initialize()
     end
 
 end)

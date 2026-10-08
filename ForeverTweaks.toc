@@ -10,4 +10,5 @@ Modules\Nameplates.lua
 Modules\Experience.lua
 Modules\Merchant.lua
 Modules\Tooltips.lua
+Modules\Menu.lua
 Settings.lua

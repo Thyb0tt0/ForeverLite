@@ -216,6 +216,12 @@ Settings.CreateCheckbox(
 )
 
 
+-- --------------------------------------------------------
+-- General
+-- --------------------------------------------------------
+
+
+
 Settings.RegisterAddOnCategory(category)
 end
 
