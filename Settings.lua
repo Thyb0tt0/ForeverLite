@@ -194,6 +194,28 @@ Settings.CreateCheckbox(
 )
 
 
+-- --------------------------------------------------------
+-- Tooltips
+-- --------------------------------------------------------
+
+local colorPlayerClassSetting =
+    Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_TooltipsColorPlayerClass",
+        "colorPlayerClass",
+        FT.db.tooltips,
+        Settings.VarType.Boolean,
+        "Enhance player tooltips",
+        false
+    )
+
+Settings.CreateCheckbox(
+    category,
+    colorPlayerClassSetting,
+    "Improves player tooltips with class colors and guild styling."
+)
+
+
 Settings.RegisterAddOnCategory(category)
 end
 

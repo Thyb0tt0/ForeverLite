@@ -56,6 +56,12 @@ local function InitializeDatabase()
         ForeverTweaksDB.merchant.autoSellJunk = false
     end
 
+    ForeverTweaksDB.tooltips = ForeverTweaksDB.tooltips or {}
+
+    if ForeverTweaksDB.tooltips.colorPlayerClass == nil then
+        ForeverTweaksDB.tooltips.colorPlayerClass = false
+    end
+
     FT.db = ForeverTweaksDB
 end
 
