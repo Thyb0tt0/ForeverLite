@@ -117,7 +117,7 @@ local function AutoSellJunk()
 
                 if itemID then
                     local _, _, _, _, _, _, _, _, _, _, price =
-                        GetItemInfo(itemID)
+                        C_Item.GetItemInfo(itemID)
 
                     sellPrice =
                         price or 0
