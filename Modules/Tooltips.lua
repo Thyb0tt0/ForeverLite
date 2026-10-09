@@ -144,12 +144,10 @@ local function EnhancePlayerTooltip(
         return
     end
 
-    local className, classFile =
+    local _, classFile =
         UnitClass(unit)
 
-    if not className
-        or not classFile
-        or IsSecret(className)
+    if not classFile
         or IsSecret(classFile) then
         return
     end
@@ -198,57 +196,6 @@ local function EnhancePlayerTooltip(
         tooltipName,
         unit
     )
-
-
-    -- --------------------------------------------------------
-    -- Class text
-    -- --------------------------------------------------------
-
-    local coloredClass =
-        classColor:WrapTextInColorCode(
-            className
-        )
-
-    for lineIndex = 2, tooltip:NumLines() do
-        local line =
-            _G[
-                tooltipName
-                .. "TextLeft"
-                .. lineIndex
-            ]
-
-        if line then
-            local text =
-                line:GetText()
-
-            if text
-                and not IsSecret(text) then
-
-                local startPosition,
-                    endPosition =
-                    text:find(
-                        className,
-                        1,
-                        true
-                    )
-
-                if startPosition then
-                    local newText =
-                        text:sub(
-                            1,
-                            startPosition - 1
-                        )
-                        .. coloredClass
-                        .. text:sub(
-                            endPosition + 1
-                        )
-
-                    line:SetText(newText)
-                    break
-                end
-            end
-        end
-    end
 end
 
 

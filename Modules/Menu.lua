@@ -6,6 +6,23 @@ local Menu = FT.Menu
 
 
 -- ------------------------------------------------------------
+-- Layout
+-- ------------------------------------------------------------
+
+local FRAME_WIDTH = 380
+
+local CONTENT_LEFT = 28
+local CONTENT_RIGHT = -28
+
+local FIRST_SECTION_Y = -50
+local SECTION_HEIGHT = 27
+local SECTION_GAP = 4
+local ROW_HEIGHT = 30
+
+local FOOTER_SPACE = 70
+
+
+-- ------------------------------------------------------------
 -- Helpers
 -- ------------------------------------------------------------
 
@@ -15,205 +32,6 @@ local function SetSetting(name, value)
     if setting then
         setting:SetValue(value)
     end
-end
-
-
-local function CreateSection(parent, text, y)
-    local label = parent:CreateFontString(
-        nil,
-        "OVERLAY",
-        "GameFontNormal"
-    )
-
-    label:SetPoint(
-        "TOPLEFT",
-        parent,
-        "TOPLEFT",
-        20,
-        y
-    )
-
-    label:SetText(text)
-
-    local line = parent:CreateTexture(
-        nil,
-        "ARTWORK"
-    )
-
-    line:SetHeight(1)
-
-    line:SetPoint(
-        "LEFT",
-        label,
-        "RIGHT",
-        10,
-        0
-    )
-
-    line:SetPoint(
-        "RIGHT",
-        parent,
-        "RIGHT",
-        -20,
-        0
-    )
-
-    line:SetColorTexture(
-        0.25,
-        0.25,
-        0.30,
-        0.8
-    )
-end
-
-
-local function CreateCheckboxRow(
-    parent,
-    text,
-    y,
-    onClick
-)
-    local row = CreateFrame(
-        "Frame",
-        nil,
-        parent
-    )
-
-    row:SetHeight(28)
-
-    row:SetPoint(
-        "TOPLEFT",
-        parent,
-        "TOPLEFT",
-        28,
-        y
-    )
-
-    row:SetPoint(
-        "TOPRIGHT",
-        parent,
-        "TOPRIGHT",
-        -28,
-        y
-    )
-
-
-    local label = row:CreateFontString(
-        nil,
-        "OVERLAY",
-        "GameFontHighlight"
-    )
-
-    label:SetPoint(
-        "LEFT",
-        row,
-        "LEFT",
-        0,
-        0
-    )
-
-    label:SetText(text)
-
-
-    local checkbox = CreateFrame(
-        "CheckButton",
-        nil,
-        row,
-        "UICheckButtonTemplate"
-    )
-
-    checkbox:SetPoint(
-        "RIGHT",
-        row,
-        "RIGHT",
-        0,
-        0
-    )
-
-    checkbox:SetScript(
-        "OnClick",
-        function(self)
-            onClick(self:GetChecked())
-        end
-    )
-
-    return checkbox
-end
-
-
-local function CreateDropdownRow(
-    parent,
-    text,
-    y,
-    defaultText
-)
-    local row = CreateFrame(
-        "Frame",
-        nil,
-        parent
-    )
-
-    row:SetHeight(28)
-
-    row:SetPoint(
-        "TOPLEFT",
-        parent,
-        "TOPLEFT",
-        28,
-        y
-    )
-
-    row:SetPoint(
-        "TOPRIGHT",
-        parent,
-        "TOPRIGHT",
-        -28,
-        y
-    )
-
-
-    local label = row:CreateFontString(
-        nil,
-        "OVERLAY",
-        "GameFontHighlight"
-    )
-
-    label:SetPoint(
-        "LEFT",
-        row,
-        "LEFT",
-        0,
-        0
-    )
-
-    label:SetText(text)
-
-
-    local dropdown = CreateFrame(
-        "DropdownButton",
-        nil,
-        row,
-        "WowStyle1DropdownTemplate"
-    )
-
-    dropdown:SetSize(
-        210,
-        24
-    )
-
-    dropdown:SetPoint(
-        "RIGHT",
-        row,
-        "RIGHT",
-        0,
-        0
-    )
-
-    dropdown:SetDefaultText(
-        defaultText
-    )
-
-    return dropdown
 end
 
 
@@ -228,11 +46,7 @@ local frame = CreateFrame(
     "BackdropTemplate"
 )
 
-frame:SetSize(
-    380,
-    440
-)
-
+frame:SetWidth(FRAME_WIDTH)
 frame:SetClampedToScreen(true)
 frame:SetMovable(true)
 frame:SetFrameStrata("DIALOG")
@@ -449,21 +263,233 @@ titleBar:SetScript(
 
 
 -- ------------------------------------------------------------
+-- Dynamic content layout
+-- ------------------------------------------------------------
+
+local cursorY = FIRST_SECTION_Y
+local hasSection = false
+
+
+local function AddSection(text)
+    if hasSection then
+        cursorY = cursorY - SECTION_GAP
+    end
+
+    local label = frame:CreateFontString(
+        nil,
+        "OVERLAY",
+        "GameFontNormal"
+    )
+
+    label:SetPoint(
+        "TOPLEFT",
+        frame,
+        "TOPLEFT",
+        20,
+        cursorY
+    )
+
+    label:SetText(text)
+
+
+    local line = frame:CreateTexture(
+        nil,
+        "ARTWORK"
+    )
+
+    line:SetHeight(1)
+
+    line:SetPoint(
+        "LEFT",
+        label,
+        "RIGHT",
+        10,
+        0
+    )
+
+    line:SetPoint(
+        "RIGHT",
+        frame,
+        "RIGHT",
+        -20,
+        0
+    )
+
+    line:SetColorTexture(
+        0.25,
+        0.25,
+        0.30,
+        0.8
+    )
+
+
+    cursorY = cursorY - SECTION_HEIGHT
+    hasSection = true
+end
+
+
+local function AddCheckboxRow(
+    text,
+    onClick
+)
+    local row = CreateFrame(
+        "Frame",
+        nil,
+        frame
+    )
+
+    row:SetHeight(28)
+
+    row:SetPoint(
+        "TOPLEFT",
+        frame,
+        "TOPLEFT",
+        CONTENT_LEFT,
+        cursorY
+    )
+
+    row:SetPoint(
+        "TOPRIGHT",
+        frame,
+        "TOPRIGHT",
+        CONTENT_RIGHT,
+        cursorY
+    )
+
+
+    local label = row:CreateFontString(
+        nil,
+        "OVERLAY",
+        "GameFontHighlight"
+    )
+
+    label:SetPoint(
+        "LEFT",
+        row,
+        "LEFT",
+        0,
+        0
+    )
+
+    label:SetText(text)
+
+
+    local checkbox = CreateFrame(
+        "CheckButton",
+        nil,
+        row,
+        "UICheckButtonTemplate"
+    )
+
+    checkbox:SetPoint(
+        "RIGHT",
+        row,
+        "RIGHT",
+        0,
+        0
+    )
+
+    checkbox:SetScript(
+        "OnClick",
+        function(self)
+            onClick(self:GetChecked())
+        end
+    )
+
+
+    cursorY = cursorY - ROW_HEIGHT
+
+    return checkbox
+end
+
+
+local function AddDropdownRow(
+    text,
+    defaultText
+)
+    local row = CreateFrame(
+        "Frame",
+        nil,
+        frame
+    )
+
+    row:SetHeight(28)
+
+    row:SetPoint(
+        "TOPLEFT",
+        frame,
+        "TOPLEFT",
+        CONTENT_LEFT,
+        cursorY
+    )
+
+    row:SetPoint(
+        "TOPRIGHT",
+        frame,
+        "TOPRIGHT",
+        CONTENT_RIGHT,
+        cursorY
+    )
+
+
+    local label = row:CreateFontString(
+        nil,
+        "OVERLAY",
+        "GameFontHighlight"
+    )
+
+    label:SetPoint(
+        "LEFT",
+        row,
+        "LEFT",
+        0,
+        0
+    )
+
+    label:SetText(text)
+
+
+    local dropdown = CreateFrame(
+        "DropdownButton",
+        nil,
+        row,
+        "WowStyle1DropdownTemplate"
+    )
+
+    dropdown:SetSize(
+        210,
+        24
+    )
+
+    dropdown:SetPoint(
+        "RIGHT",
+        row,
+        "RIGHT",
+        0,
+        0
+    )
+
+    dropdown:SetDefaultText(
+        defaultText
+    )
+
+
+    cursorY = cursorY - ROW_HEIGHT
+
+    return dropdown
+end
+
+
+-- ------------------------------------------------------------
 -- Nameplates
 -- ------------------------------------------------------------
 
-CreateSection(
-    frame,
-    "Nameplates",
-    -53
-)
+AddSection("Nameplates")
 
 
 local healthCheckbox =
-    CreateCheckboxRow(
-        frame,
+    AddCheckboxRow(
         "Show health on nameplates",
-        -72,
         function(value)
             SetSetting(
                 "ForeverTweaks_NameplateHealthText",
@@ -474,10 +500,8 @@ local healthCheckbox =
 
 
 local healthFormatDropdown =
-    CreateDropdownRow(
-        frame,
+    AddDropdownRow(
         "Health format",
-        -105,
         "Remaining health"
     )
 
@@ -526,10 +550,8 @@ healthFormatDropdown:SetupMenu(
 
 
 local healthPositionDropdown =
-    CreateDropdownRow(
-        frame,
+    AddDropdownRow(
         "Health position",
-        -136,
         "Left"
     )
 
@@ -574,18 +596,12 @@ healthPositionDropdown:SetupMenu(
 -- Experience
 -- ------------------------------------------------------------
 
-CreateSection(
-    frame,
-    "Experience",
-    -179
-)
+AddSection("Experience")
 
 
 local experienceCheckbox =
-    CreateCheckboxRow(
-        frame,
+    AddCheckboxRow(
         "Show XP tracker",
-        -198,
         function(value)
             SetSetting(
                 "ForeverTweaks_ExperienceEnabled",
@@ -595,22 +611,28 @@ local experienceCheckbox =
     )
 
 
+local xpBarTextCheckbox =
+    AddCheckboxRow(
+        "Always show XP bar text",
+        function(value)
+            SetSetting(
+                "ForeverTweaks_ExperienceShowXPBarText",
+                value
+            )
+        end
+    )
+
+
 -- ------------------------------------------------------------
--- Merchant
+-- Vendor
 -- ------------------------------------------------------------
 
-CreateSection(
-    frame,
-    "Vendor",
-    -241
-)
+AddSection("Vendor")
 
 
 local autoRepairCheckbox =
-    CreateCheckboxRow(
-        frame,
+    AddCheckboxRow(
         "Automatically repair equipment",
-        -260,
         function(value)
             SetSetting(
                 "ForeverTweaks_MerchantAutoRepair",
@@ -621,10 +643,8 @@ local autoRepairCheckbox =
 
 
 local autoSellCheckbox =
-    CreateCheckboxRow(
-        frame,
+    AddCheckboxRow(
         "Automatically sell junk",
-        -291,
         function(value)
             SetSetting(
                 "ForeverTweaks_MerchantAutoSellJunk",
@@ -638,18 +658,12 @@ local autoSellCheckbox =
 -- Tooltips
 -- ------------------------------------------------------------
 
-CreateSection(
-    frame,
-    "Tooltips",
-    -334
-)
+AddSection("Tooltips")
 
 
 local tooltipCheckbox =
-    CreateCheckboxRow(
-        frame,
-        "Enhance player tooltips",
-        -353,
+    AddCheckboxRow(
+        "Color player tooltips",
         function(value)
             SetSetting(
                 "ForeverTweaks_TooltipsColorPlayerClass",
@@ -657,6 +671,15 @@ local tooltipCheckbox =
             )
         end
     )
+
+
+-- ------------------------------------------------------------
+-- Dynamic frame height
+-- ------------------------------------------------------------
+
+frame:SetHeight(
+    math.abs(cursorY) + FOOTER_SPACE
+)
 
 
 -- ------------------------------------------------------------
@@ -776,6 +799,10 @@ function Menu:Refresh()
         FT.db.experience.enabled
     )
 
+    xpBarTextCheckbox:SetChecked(
+        FT.db.experience.showXPBarText
+    )
+
     autoRepairCheckbox:SetChecked(
         FT.db.merchant.autoRepair
     )
@@ -788,8 +815,6 @@ function Menu:Refresh()
         FT.db.tooltips.colorPlayerClass
     )
 
-    -- If a setting was changed from Blizzard Settings,
-    -- refresh the dropdown text when our menu opens.
     healthFormatDropdown:GenerateMenu()
     healthPositionDropdown:GenerateMenu()
 end

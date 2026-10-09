@@ -153,6 +153,32 @@ Settings.CreateCheckbox(
     "Shows your session XP per hour and estimated time to level."
 )
 
+local showXPBarTextSetting =
+    Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_ExperienceShowXPBarText",
+        "showXPBarText",
+        FT.db.experience,
+        Settings.VarType.Boolean,
+        "Always show XP bar text",
+        C_CVar.GetCVarBool("xpBarText")
+    )
+
+showXPBarTextSetting:SetValueChangedCallback(
+    function(_, value)
+        C_CVar.SetCVar(
+            "xpBarText",
+            value and 1 or 0
+        )
+    end
+)
+
+Settings.CreateCheckbox(
+    category,
+    showXPBarTextSetting,
+    "Always displays your current and required XP on the experience bar."
+)
+
 
 -- --------------------------------------------------------
 -- Merchant
@@ -205,14 +231,14 @@ local colorPlayerClassSetting =
         "colorPlayerClass",
         FT.db.tooltips,
         Settings.VarType.Boolean,
-        "Enhance player tooltips",
+        "Color player tooltips",
         false
     )
 
 Settings.CreateCheckbox(
     category,
     colorPlayerClassSetting,
-    "Improves player tooltips with class colors and guild styling."
+    "Colors player names by class and styles guild names."
 )
 
 

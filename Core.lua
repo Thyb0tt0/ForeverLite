@@ -30,6 +30,11 @@ local function InitializeDatabase()
         ForeverTweaksDB.experience.enabled = false
     end
 
+    if ForeverTweaksDB.experience.showXPBarText == nil then
+        ForeverTweaksDB.experience.showXPBarText =
+            C_CVar.GetCVarBool("xpBarText")
+    end
+
     if ForeverTweaksDB.experience.point == nil then
         ForeverTweaksDB.experience.point = "CENTER"
     end
