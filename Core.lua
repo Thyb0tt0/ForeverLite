@@ -85,6 +85,28 @@ local function InitializeDatabase()
         ForeverTweaksDB.menu.y = 0
     end
 
+    ForeverTweaksDB.reminders = ForeverTweaksDB.reminders or {}
+
+    if ForeverTweaksDB.reminders.enabled == nil then
+        ForeverTweaksDB.reminders.enabled = false
+    end
+
+    if ForeverTweaksDB.reminders.point == nil then
+        ForeverTweaksDB.reminders.point = "CENTER"
+    end
+
+    if ForeverTweaksDB.reminders.relativePoint == nil then
+        ForeverTweaksDB.reminders.relativePoint = "CENTER"
+    end
+
+    if ForeverTweaksDB.reminders.x == nil then
+        ForeverTweaksDB.reminders.x = 0
+    end
+
+    if ForeverTweaksDB.reminders.y == nil then
+        ForeverTweaksDB.reminders.y = 120
+    end
+
     FT.db = ForeverTweaksDB
 end
 
@@ -118,6 +140,9 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
         print("|cffffff00/ft xp unlock|r - Unlock XP tracker position")
         print("|cffffff00/ft xp lock|r - Lock XP tracker position")
         print("|cffffff00/ft xp center|r - Reset XP tracker position")
+        print("|cffffff00/ft reminders unlock|r - Unlock buff reminders")
+        print("|cffffff00/ft reminders lock|r - Lock buff reminders")
+        print("|cffffff00/ft reminders center|r - Reset reminder position")
 
     elseif message == "health" then
         local newValue =
@@ -206,6 +231,49 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
                 .. "XP tracker position reset."
             )
         end
+    
+    elseif message == "reminders unlock" then
+        if not FT.db.reminders.enabled then
+            print(
+                "|cff33ff99ForeverTweaks|r: "
+                .. "Enable buff reminders before unlocking them."
+            )
+
+            return
+        end
+
+        if FT.Reminders then
+            FT.Reminders:SetUnlocked(true)
+
+            print(
+                "|cff33ff99ForeverTweaks|r: "
+                .. "Buff reminders unlocked. "
+                .. "Drag them with the left mouse button."
+            )
+        end
+
+
+    elseif message == "reminders lock" then
+        if FT.Reminders then
+            FT.Reminders:SetUnlocked(false)
+
+            print(
+                "|cff33ff99ForeverTweaks|r: "
+                .. "Buff reminders locked."
+            )
+        end
+
+
+    elseif message == "reminders center" then
+        if FT.Reminders then
+            FT.Reminders:ResetPosition()
+
+            print(
+                "|cff33ff99ForeverTweaks|r: "
+                .. "Buff reminder position reset."
+            )
+        end
+
 
     else
         print(

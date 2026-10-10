@@ -672,6 +672,23 @@ local tooltipCheckbox =
         end
     )
 
+-- ------------------------------------------------------------
+-- Reminders
+-- ------------------------------------------------------------
+
+AddSection("Reminders")
+
+
+local remindersCheckbox =
+    AddCheckboxRow(
+        "Show missing buff reminders",
+        function(value)
+            SetSetting(
+                "ForeverTweaks_RemindersEnabled",
+                value
+            )
+        end
+    )
 
 -- ------------------------------------------------------------
 -- Dynamic frame height
@@ -813,6 +830,10 @@ function Menu:Refresh()
 
     tooltipCheckbox:SetChecked(
         FT.db.tooltips.colorPlayerClass
+    )
+
+    remindersCheckbox:SetChecked(
+        FT.db.reminders.enabled
     )
 
     healthFormatDropdown:GenerateMenu()

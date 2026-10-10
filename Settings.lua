@@ -243,8 +243,33 @@ Settings.CreateCheckbox(
 
 
 -- --------------------------------------------------------
--- General
+-- Reminders
 -- --------------------------------------------------------
+
+local remindersEnabledSetting =
+    Settings.RegisterAddOnSetting(
+        category,
+        "ForeverTweaks_RemindersEnabled",
+        "enabled",
+        FT.db.reminders,
+        Settings.VarType.Boolean,
+        "Show missing buff reminders",
+        false
+    )
+
+remindersEnabledSetting:SetValueChangedCallback(
+    function(_, value)
+        if FT.Reminders then
+            FT.Reminders:Refresh()
+        end
+    end
+)
+
+Settings.CreateCheckbox(
+    category,
+    remindersEnabledSetting,
+    "Shows an icon when an important personal buff is missing."
+)
 
 
 
