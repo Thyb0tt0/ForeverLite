@@ -1,8 +1,8 @@
-local _, FT = ...
+local _, FL = ...
 
-FT.Merchant = FT.Merchant or {}
+FL.Merchant = FL.Merchant or {}
 
-local Merchant = FT.Merchant
+local Merchant = FL.Merchant
 
 
 -- ------------------------------------------------------------
@@ -41,8 +41,8 @@ end
 -- ------------------------------------------------------------
 
 local function AutoRepair()
-    if not FT.db
-        or not FT.db.merchant.autoRepair then
+    if not FL.db
+        or not FL.db.merchant.autoRepair then
         return
     end
 
@@ -61,7 +61,7 @@ local function AutoRepair()
 
     if GetMoney() < repairCost then
         print(
-            "|cff33ff99ForeverTweaks|r: "
+            "|cff33ff99ForeverLite|r: "
             .. "Not enough money to repair. "
             .. "Cost: "
             .. FormatMoney(repairCost)
@@ -73,7 +73,7 @@ local function AutoRepair()
     RepairAllItems()
 
     print(
-        "|cff33ff99ForeverTweaks|r: "
+        "|cff33ff99ForeverLite|r: "
         .. "Repaired equipment for "
         .. FormatMoney(repairCost)
         .. "."
@@ -86,8 +86,8 @@ end
 -- ------------------------------------------------------------
 
 local function AutoSellJunk()
-    if not FT.db
-        or not FT.db.merchant.autoSellJunk then
+    if not FL.db
+        or not FL.db.merchant.autoSellJunk then
         return
     end
 
@@ -143,7 +143,7 @@ local function AutoSellJunk()
 
     if soldItems > 0 then
         print(
-            "|cff33ff99ForeverTweaks|r: "
+            "|cff33ff99ForeverLite|r: "
             .. "Sold "
             .. soldItems
             .. " junk item"

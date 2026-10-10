@@ -1,8 +1,8 @@
-local addonName, FT = ...
+local addonName, FL = ...
 
-FT.Experience = FT.Experience or {}
+FL.Experience = FL.Experience or {}
 
-local Experience = FT.Experience
+local Experience = FL.Experience
 
 
 -- ------------------------------------------------------------
@@ -11,7 +11,7 @@ local Experience = FT.Experience
 
 local frame = CreateFrame(
     "Frame",
-    "ForeverTweaksXPTracker",
+    "ForeverLiteXPTracker",
     UIParent
 )
 
@@ -99,11 +99,11 @@ local unlocked = false
 -- ------------------------------------------------------------
 
 local function ApplySavedPosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local db = FT.db.experience
+    local db = FL.db.experience
 
     frame:ClearAllPoints()
 
@@ -118,14 +118,14 @@ end
 
 
 local function SavePosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
     local point, _, relativePoint, x, y =
         frame:GetPoint(1)
 
-    local db = FT.db.experience
+    local db = FL.db.experience
 
     db.point = point or "CENTER"
     db.relativePoint = relativePoint or "CENTER"
@@ -237,8 +237,8 @@ end
 -- ------------------------------------------------------------
 
 local function UpdateDisplay()
-    if not FT.db
-        or not FT.db.experience.enabled then
+    if not FL.db
+        or not FL.db.experience.enabled then
         return
     end
 
@@ -306,8 +306,8 @@ end
 
 
 function Experience:Refresh()
-    if not FT.db
-        or not FT.db.experience.enabled then
+    if not FL.db
+        or not FL.db.experience.enabled then
 
         unlocked = false
         frame:EnableMouse(false)
@@ -341,11 +341,11 @@ end
 
 
 function Experience:ResetPosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local db = FT.db.experience
+    local db = FL.db.experience
 
     db.point = "CENTER"
     db.relativePoint = "CENTER"
@@ -369,8 +369,8 @@ local function HandleXPUpdate()
         return
     end
 
-    if FT.db
-        and FT.db.experience.enabled then
+    if FL.db
+        and FL.db.experience.enabled then
 
         local gainedXP =
             currentXP - lastXP
@@ -439,8 +439,8 @@ eventFrame:SetScript(
                 startTime = nil
                 lastXP = UnitXP("player")
 
-                if FT.db
-                    and FT.db.experience.enabled then
+                if FL.db
+                    and FL.db.experience.enabled then
                     Experience:Reset()
                 end
             end)

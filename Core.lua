@@ -1,6 +1,6 @@
-local addonName, FT = ...
+local addonName, FL = ...
 
-FT.name = addonName
+FL.name = addonName
 
 
 -- ------------------------------------------------------------
@@ -8,106 +8,106 @@ FT.name = addonName
 -- ------------------------------------------------------------
 
 local function InitializeDatabase()
-    ForeverTweaksDB = ForeverTweaksDB or {}
+    ForeverLiteDB = ForeverLiteDB or {}
 
-    ForeverTweaksDB.nameplates = ForeverTweaksDB.nameplates or {}
+    ForeverLiteDB.nameplates = ForeverLiteDB.nameplates or {}
 
-    if ForeverTweaksDB.nameplates.healthText == nil then
-        ForeverTweaksDB.nameplates.healthText = false
+    if ForeverLiteDB.nameplates.healthText == nil then
+        ForeverLiteDB.nameplates.healthText = false
     end
 
-    if ForeverTweaksDB.nameplates.healthFormat == nil then
-        ForeverTweaksDB.nameplates.healthFormat = "remaining"
+    if ForeverLiteDB.nameplates.healthFormat == nil then
+        ForeverLiteDB.nameplates.healthFormat = "remaining"
     end
 
-    if ForeverTweaksDB.nameplates.healthPosition == nil then
-        ForeverTweaksDB.nameplates.healthPosition = "left"
+    if ForeverLiteDB.nameplates.healthPosition == nil then
+        ForeverLiteDB.nameplates.healthPosition = "left"
     end
 
-    ForeverTweaksDB.experience = ForeverTweaksDB.experience or {}
+    ForeverLiteDB.experience = ForeverLiteDB.experience or {}
 
-    if ForeverTweaksDB.experience.enabled == nil then
-        ForeverTweaksDB.experience.enabled = false
+    if ForeverLiteDB.experience.enabled == nil then
+        ForeverLiteDB.experience.enabled = false
     end
 
-    if ForeverTweaksDB.experience.showXPBarText == nil then
-        ForeverTweaksDB.experience.showXPBarText =
+    if ForeverLiteDB.experience.showXPBarText == nil then
+        ForeverLiteDB.experience.showXPBarText =
             C_CVar.GetCVarBool("xpBarText")
     end
 
-    if ForeverTweaksDB.experience.point == nil then
-        ForeverTweaksDB.experience.point = "CENTER"
+    if ForeverLiteDB.experience.point == nil then
+        ForeverLiteDB.experience.point = "CENTER"
     end
 
-    if ForeverTweaksDB.experience.relativePoint == nil then
-        ForeverTweaksDB.experience.relativePoint = "CENTER"
+    if ForeverLiteDB.experience.relativePoint == nil then
+        ForeverLiteDB.experience.relativePoint = "CENTER"
     end
 
-    if ForeverTweaksDB.experience.x == nil then
-        ForeverTweaksDB.experience.x = 0
+    if ForeverLiteDB.experience.x == nil then
+        ForeverLiteDB.experience.x = 0
     end
 
-    if ForeverTweaksDB.experience.y == nil then
-        ForeverTweaksDB.experience.y = 160
+    if ForeverLiteDB.experience.y == nil then
+        ForeverLiteDB.experience.y = 160
     end
 
-    ForeverTweaksDB.merchant = ForeverTweaksDB.merchant or {}
+    ForeverLiteDB.merchant = ForeverLiteDB.merchant or {}
 
-    if ForeverTweaksDB.merchant.autoRepair == nil then
-        ForeverTweaksDB.merchant.autoRepair = false
+    if ForeverLiteDB.merchant.autoRepair == nil then
+        ForeverLiteDB.merchant.autoRepair = false
     end
 
-    if ForeverTweaksDB.merchant.autoSellJunk == nil then
-        ForeverTweaksDB.merchant.autoSellJunk = false
+    if ForeverLiteDB.merchant.autoSellJunk == nil then
+        ForeverLiteDB.merchant.autoSellJunk = false
     end
 
-    ForeverTweaksDB.tooltips = ForeverTweaksDB.tooltips or {}
+    ForeverLiteDB.tooltips = ForeverLiteDB.tooltips or {}
 
-    if ForeverTweaksDB.tooltips.colorPlayerClass == nil then
-        ForeverTweaksDB.tooltips.colorPlayerClass = false
+    if ForeverLiteDB.tooltips.colorPlayerClass == nil then
+        ForeverLiteDB.tooltips.colorPlayerClass = false
     end
 
-    ForeverTweaksDB.menu = ForeverTweaksDB.menu or {}
+    ForeverLiteDB.menu = ForeverLiteDB.menu or {}
 
-    if ForeverTweaksDB.menu.point == nil then
-        ForeverTweaksDB.menu.point = "CENTER"
+    if ForeverLiteDB.menu.point == nil then
+        ForeverLiteDB.menu.point = "CENTER"
     end
 
-    if ForeverTweaksDB.menu.relativePoint == nil then
-        ForeverTweaksDB.menu.relativePoint = "CENTER"
+    if ForeverLiteDB.menu.relativePoint == nil then
+        ForeverLiteDB.menu.relativePoint = "CENTER"
     end
 
-    if ForeverTweaksDB.menu.x == nil then
-        ForeverTweaksDB.menu.x = 0
+    if ForeverLiteDB.menu.x == nil then
+        ForeverLiteDB.menu.x = 0
     end
 
-    if ForeverTweaksDB.menu.y == nil then
-        ForeverTweaksDB.menu.y = 0
+    if ForeverLiteDB.menu.y == nil then
+        ForeverLiteDB.menu.y = 0
     end
 
-    ForeverTweaksDB.reminders = ForeverTweaksDB.reminders or {}
+    ForeverLiteDB.reminders = ForeverLiteDB.reminders or {}
 
-    if ForeverTweaksDB.reminders.enabled == nil then
-        ForeverTweaksDB.reminders.enabled = false
+    if ForeverLiteDB.reminders.enabled == nil then
+        ForeverLiteDB.reminders.enabled = false
     end
 
-    if ForeverTweaksDB.reminders.point == nil then
-        ForeverTweaksDB.reminders.point = "CENTER"
+    if ForeverLiteDB.reminders.point == nil then
+        ForeverLiteDB.reminders.point = "CENTER"
     end
 
-    if ForeverTweaksDB.reminders.relativePoint == nil then
-        ForeverTweaksDB.reminders.relativePoint = "CENTER"
+    if ForeverLiteDB.reminders.relativePoint == nil then
+        ForeverLiteDB.reminders.relativePoint = "CENTER"
     end
 
-    if ForeverTweaksDB.reminders.x == nil then
-        ForeverTweaksDB.reminders.x = 0
+    if ForeverLiteDB.reminders.x == nil then
+        ForeverLiteDB.reminders.x = 0
     end
 
-    if ForeverTweaksDB.reminders.y == nil then
-        ForeverTweaksDB.reminders.y = 120
+    if ForeverLiteDB.reminders.y == nil then
+        ForeverLiteDB.reminders.y = 120
     end
 
-    FT.db = ForeverTweaksDB
+    FL.db = ForeverLiteDB
 end
 
 
@@ -115,138 +115,138 @@ end
 -- Slash commands
 -- ------------------------------------------------------------
 
-SLASH_FOREVERTWEAKS1 = "/ft"
-SLASH_FOREVERTWEAKS2 = "/forevertweaks"
+SLASH_ForeverLite1 = "/fl"
+SLASH_ForeverLite2 = "/ForeverLite"
 
-SlashCmdList["FOREVERTWEAKS"] = function(message)
+SlashCmdList["ForeverLite"] = function(message)
     message = strtrim(string.lower(message or ""))
 
     if message == "" then
-        if FT.Menu then
-            FT.Menu:Toggle()
+        if FL.Menu then
+            FL.Menu:Toggle()
         end
 
     elseif message == "settings" then
-        FT:OpenSettings()
+        FL:OpenSettings()
 
     elseif message == "help" then
-        print("|cff33ff99ForeverTweaks|r commands:")
-        print("|cffffff00/ft|r - Toggle addon menu")
-        print("|cffffff00/ft help|r - List of all commands")
-        print("|cffffff00/ft settings|r - Open addon settings")
-        print("|cffffff00/ft health|r - Toggle nameplate health")
-        print("|cffffff00/ft xp|r - Toggle XP tracker")
-        print("|cffffff00/ft xp reset|r - Reset XP tracker session")
-        print("|cffffff00/ft xp unlock|r - Unlock XP tracker position")
-        print("|cffffff00/ft xp lock|r - Lock XP tracker position")
-        print("|cffffff00/ft xp center|r - Reset XP tracker position")
-        print("|cffffff00/ft reminders unlock|r - Unlock buff reminders")
-        print("|cffffff00/ft reminders lock|r - Lock buff reminders")
-        print("|cffffff00/ft reminders center|r - Reset reminder position")
+        print("|cff33ff99ForeverLite|r commands:")
+        print("|cffffff00/fl|r - Toggle addon menu")
+        print("|cffffff00/fl help|r - List of all commands")
+        print("|cffffff00/fl settings|r - Open addon settings")
+        print("|cffffff00/fl health|r - Toggle nameplate health")
+        print("|cffffff00/fl xp|r - Toggle XP tracker")
+        print("|cffffff00/fl xp reset|r - Reset XP tracker session")
+        print("|cffffff00/fl xp unlock|r - Unlock XP tracker position")
+        print("|cffffff00/fl xp lock|r - Lock XP tracker position")
+        print("|cffffff00/fl xp center|r - Reset XP tracker position")
+        print("|cffffff00/fl reminders unlock|r - Unlock buff reminders")
+        print("|cffffff00/fl reminders lock|r - Lock buff reminders")
+        print("|cffffff00/fl reminders center|r - Reset reminder position")
 
     elseif message == "health" then
         local newValue =
-            not FT.db.nameplates.healthText
+            not FL.db.nameplates.healthText
 
         local setting = Settings.GetSetting(
-            "ForeverTweaks_NameplateHealthText"
+            "ForeverLite_NameplateHealthText"
         )
 
         if setting then
             setting:SetValue(newValue)
         else
-            FT.db.nameplates.healthText =
+            FL.db.nameplates.healthText =
                 newValue
 
-            if FT.Nameplates then
-                FT.Nameplates:Refresh()
+            if FL.Nameplates then
+                FL.Nameplates:Refresh()
             end
         end
 
     elseif message == "xp" then
         local newValue =
-            not FT.db.experience.enabled
+            not FL.db.experience.enabled
 
         local setting = Settings.GetSetting(
-            "ForeverTweaks_ExperienceEnabled"
+            "ForeverLite_ExperienceEnabled"
         )
 
         if setting then
             setting:SetValue(newValue)
         else
-            FT.db.experience.enabled =
+            FL.db.experience.enabled =
                 newValue
 
-            if FT.Experience then
-                FT.Experience:Refresh()
+            if FL.Experience then
+                FL.Experience:Refresh()
             end
         end
 
     elseif message == "xp reset" then
-        if FT.Experience then
-            FT.Experience:Reset()
+        if FL.Experience then
+            FL.Experience:Reset()
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "XP tracker reset."
             )
         end
 
     elseif message == "xp unlock" then
-        if not FT.db.experience.enabled then
+        if not FL.db.experience.enabled then
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "Enable the XP tracker before unlocking it."
             )
 
             return
         end
 
-        if FT.Experience then
-            FT.Experience:SetUnlocked(true)
+        if FL.Experience then
+            FL.Experience:SetUnlocked(true)
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "XP tracker unlocked. "
                 .. "Drag it with the left mouse button."
             )
         end
 
     elseif message == "xp lock" then
-        if FT.Experience then
-            FT.Experience:SetUnlocked(false)
+        if FL.Experience then
+            FL.Experience:SetUnlocked(false)
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "XP tracker locked."
             )
         end
 
     elseif message == "xp center" then
-        if FT.Experience then
-            FT.Experience:ResetPosition()
+        if FL.Experience then
+            FL.Experience:ResetPosition()
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "XP tracker position reset."
             )
         end
     
     elseif message == "reminders unlock" then
-        if not FT.db.reminders.enabled then
+        if not FL.db.reminders.enabled then
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "Enable buff reminders before unlocking them."
             )
 
             return
         end
 
-        if FT.Reminders then
-            FT.Reminders:SetUnlocked(true)
+        if FL.Reminders then
+            FL.Reminders:SetUnlocked(true)
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "Buff reminders unlocked. "
                 .. "Drag them with the left mouse button."
             )
@@ -254,22 +254,22 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
 
 
     elseif message == "reminders lock" then
-        if FT.Reminders then
-            FT.Reminders:SetUnlocked(false)
+        if FL.Reminders then
+            FL.Reminders:SetUnlocked(false)
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "Buff reminders locked."
             )
         end
 
 
     elseif message == "reminders center" then
-        if FT.Reminders then
-            FT.Reminders:ResetPosition()
+        if FL.Reminders then
+            FL.Reminders:ResetPosition()
 
             print(
-                "|cff33ff99ForeverTweaks|r: "
+                "|cff33ff99ForeverLite|r: "
                 .. "Buff reminder position reset."
             )
         end
@@ -277,8 +277,8 @@ SlashCmdList["FOREVERTWEAKS"] = function(message)
 
     else
         print(
-            "|cff33ff99ForeverTweaks|r: Unknown command. "
-            .. "Use |cffffff00/ft help|r for available commands."
+            "|cff33ff99ForeverLite|r: Unknown command. "
+            .. "Use |cffffff00/fl help|r for available commands."
         )
     end
 end
@@ -298,12 +298,12 @@ eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
 
     InitializeDatabase()
 
-    if FT.InitializeSettings then
-        FT:InitializeSettings()
+    if FL.InitializeSettings then
+        FL:InitializeSettings()
     end
 
-    if FT.Menu then
-        FT.Menu:Initialize()
+    if FL.Menu then
+        FL.Menu:Initialize()
     end
 
 end)

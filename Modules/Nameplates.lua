@@ -1,8 +1,8 @@
-local addonName, FT = ...
+local addonName, FL = ...
 
-FT.Nameplates = FT.Nameplates or {}
+FL.Nameplates = FL.Nameplates or {}
 
-local Nameplates = FT.Nameplates
+local Nameplates = FL.Nameplates
 
 
 -- ------------------------------------------------------------
@@ -32,7 +32,7 @@ local function GetHealthLabel(unit)
     end
 
     -- Create the FontString only once for this pooled nameplate.
-    if not namePlate.ForeverTweaksHealthText then
+    if not namePlate.ForeverLiteHealthText then
         local label = parent:CreateFontString(
             nil,
             "OVERLAY",
@@ -45,17 +45,17 @@ local function GetHealthLabel(unit)
         label:SetShadowColor(0, 0, 0, 1)
         label:SetShadowOffset(1, -1)
 
-        namePlate.ForeverTweaksHealthText = label
+        namePlate.ForeverLiteHealthText = label
     end
 
-    local label = namePlate.ForeverTweaksHealthText
+    local label = namePlate.ForeverLiteHealthText
 
     -- Reposition every time so changing the setting takes effect
     -- immediately on already-visible nameplates.
     label:ClearAllPoints()
 
-    if FT.db
-        and FT.db.nameplates.healthPosition == "center" then
+    if FL.db
+        and FL.db.nameplates.healthPosition == "center" then
 
         label:SetPoint(
             "CENTER",
@@ -85,7 +85,7 @@ local function HideHealthText(unit)
         return
     end
 
-    local label = namePlate.ForeverTweaksHealthText
+    local label = namePlate.ForeverLiteHealthText
 
     if label then
         label:Hide()
@@ -98,7 +98,7 @@ end
 -- ------------------------------------------------------------
 
 local function UpdateHealthText(unit)
-    if not FT.db then
+    if not FL.db then
         return
     end
 
@@ -106,7 +106,7 @@ local function UpdateHealthText(unit)
         return
     end
 
-    if not FT.db.nameplates.healthText then
+    if not FL.db.nameplates.healthText then
         HideHealthText(unit)
         return
     end
@@ -117,7 +117,7 @@ local function UpdateHealthText(unit)
         return
     end
 
-    local format = FT.db.nameplates.healthFormat
+    local format = FL.db.nameplates.healthFormat
 
     if format == "percentage" then
         local healthPercent = UnitHealthPercent(
@@ -164,7 +164,7 @@ end
 -- ------------------------------------------------------------
 
 function Nameplates:Refresh()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
@@ -174,10 +174,10 @@ function Nameplates:Refresh()
         local unit = namePlate.unitToken
 
         if unit then
-            if FT.db.nameplates.healthText then
+            if FL.db.nameplates.healthText then
                 UpdateHealthText(unit)
             else
-                local label = namePlate.ForeverTweaksHealthText
+                local label = namePlate.ForeverLiteHealthText
 
                 if label then
                     label:Hide()

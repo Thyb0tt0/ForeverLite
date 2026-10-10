@@ -1,8 +1,8 @@
-local _, FT = ...
+local _, FL = ...
 
-FT.Menu = FT.Menu or {}
+FL.Menu = FL.Menu or {}
 
-local Menu = FT.Menu
+local Menu = FL.Menu
 
 
 -- ------------------------------------------------------------
@@ -41,7 +41,7 @@ end
 
 local frame = CreateFrame(
     "Frame",
-    "ForeverTweaksMenu",
+    "ForeverLiteMenu",
     UIParent,
     "BackdropTemplate"
 )
@@ -85,7 +85,7 @@ frame:Hide()
 
 table.insert(
     UISpecialFrames,
-    "ForeverTweaksMenu"
+    "ForeverLiteMenu"
 )
 
 
@@ -153,7 +153,7 @@ titleText:SetPoint(
 )
 
 titleText:SetText(
-    FT.name or "ForeverTweaks"
+    FL.name or "ForeverLite"
 )
 
 
@@ -210,11 +210,11 @@ closeButton:SetPoint(
 -- ------------------------------------------------------------
 
 local function ApplySavedPosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local db = FT.db.menu
+    local db = FL.db.menu
 
     frame:ClearAllPoints()
 
@@ -229,14 +229,14 @@ end
 
 
 local function SavePosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
     local point, _, relativePoint, x, y =
         frame:GetPoint(1)
 
-    local db = FT.db.menu
+    local db = FL.db.menu
 
     db.point = point or "CENTER"
     db.relativePoint = relativePoint or "CENTER"
@@ -492,7 +492,7 @@ local healthCheckbox =
         "Show health on nameplates",
         function(value)
             SetSetting(
-                "ForeverTweaks_NameplateHealthText",
+                "ForeverLite_NameplateHealthText",
                 value
             )
         end
@@ -509,18 +509,18 @@ local healthFormatDropdown =
 healthFormatDropdown:SetupMenu(
     function(dropdown, rootDescription)
         local function IsSelected(value)
-            return FT.db
-                and FT.db.nameplates
-                and FT.db.nameplates.healthFormat == value
+            return FL.db
+                and FL.db.nameplates
+                and FL.db.nameplates.healthFormat == value
         end
 
         local function SetSelected(value)
-            if not FT.db then
+            if not FL.db then
                 return
             end
 
             SetSetting(
-                "ForeverTweaks_NameplateHealthFormat",
+                "ForeverLite_NameplateHealthFormat",
                 value
             )
         end
@@ -559,18 +559,18 @@ local healthPositionDropdown =
 healthPositionDropdown:SetupMenu(
     function(dropdown, rootDescription)
         local function IsSelected(value)
-            return FT.db
-                and FT.db.nameplates
-                and FT.db.nameplates.healthPosition == value
+            return FL.db
+                and FL.db.nameplates
+                and FL.db.nameplates.healthPosition == value
         end
 
         local function SetSelected(value)
-            if not FT.db then
+            if not FL.db then
                 return
             end
 
             SetSetting(
-                "ForeverTweaks_NameplateHealthPosition",
+                "ForeverLite_NameplateHealthPosition",
                 value
             )
         end
@@ -604,7 +604,7 @@ local experienceCheckbox =
         "Show XP tracker",
         function(value)
             SetSetting(
-                "ForeverTweaks_ExperienceEnabled",
+                "ForeverLite_ExperienceEnabled",
                 value
             )
         end
@@ -616,7 +616,7 @@ local xpBarTextCheckbox =
         "Always show XP bar text",
         function(value)
             SetSetting(
-                "ForeverTweaks_ExperienceShowXPBarText",
+                "ForeverLite_ExperienceShowXPBarText",
                 value
             )
         end
@@ -635,7 +635,7 @@ local autoRepairCheckbox =
         "Automatically repair equipment",
         function(value)
             SetSetting(
-                "ForeverTweaks_MerchantAutoRepair",
+                "ForeverLite_MerchantAutoRepair",
                 value
             )
         end
@@ -647,7 +647,7 @@ local autoSellCheckbox =
         "Automatically sell junk",
         function(value)
             SetSetting(
-                "ForeverTweaks_MerchantAutoSellJunk",
+                "ForeverLite_MerchantAutoSellJunk",
                 value
             )
         end
@@ -666,7 +666,7 @@ local tooltipCheckbox =
         "Color player tooltips",
         function(value)
             SetSetting(
-                "ForeverTweaks_TooltipsColorPlayerClass",
+                "ForeverLite_TooltipsColorPlayerClass",
                 value
             )
         end
@@ -684,7 +684,7 @@ local remindersCheckbox =
         "Show missing buff reminders",
         function(value)
             SetSetting(
-                "ForeverTweaks_RemindersEnabled",
+                "ForeverLite_RemindersEnabled",
                 value
             )
         end
@@ -762,7 +762,7 @@ settingsButton:SetText(
 settingsButton:SetScript(
     "OnClick",
     function()
-        FT:OpenSettings()
+        FL:OpenSettings()
     end
 )
 
@@ -804,36 +804,36 @@ reloadButton:SetScript(
 -- ------------------------------------------------------------
 
 function Menu:Refresh()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
     healthCheckbox:SetChecked(
-        FT.db.nameplates.healthText
+        FL.db.nameplates.healthText
     )
 
     experienceCheckbox:SetChecked(
-        FT.db.experience.enabled
+        FL.db.experience.enabled
     )
 
     xpBarTextCheckbox:SetChecked(
-        FT.db.experience.showXPBarText
+        FL.db.experience.showXPBarText
     )
 
     autoRepairCheckbox:SetChecked(
-        FT.db.merchant.autoRepair
+        FL.db.merchant.autoRepair
     )
 
     autoSellCheckbox:SetChecked(
-        FT.db.merchant.autoSellJunk
+        FL.db.merchant.autoSellJunk
     )
 
     tooltipCheckbox:SetChecked(
-        FT.db.tooltips.colorPlayerClass
+        FL.db.tooltips.colorPlayerClass
     )
 
     remindersCheckbox:SetChecked(
-        FT.db.reminders.enabled
+        FL.db.reminders.enabled
     )
 
     healthFormatDropdown:GenerateMenu()

@@ -1,8 +1,8 @@
-local _, FT = ...
+local _, FL = ...
 
-FT.Tooltips = FT.Tooltips or {}
+FL.Tooltips = FL.Tooltips or {}
 
-local Tooltips = FT.Tooltips
+local Tooltips = FL.Tooltips
 
 
 -- ------------------------------------------------------------
@@ -117,8 +117,8 @@ local function EnhancePlayerTooltip(
     tooltip,
     tooltipData
 )
-    if not FT.db
-        or not FT.db.tooltips.colorPlayerClass then
+    if not FL.db
+        or not FL.db.tooltips.colorPlayerClass then
         return
     end
 

@@ -1,26 +1,26 @@
-local addonName, FT = ...
+local addonName, FL = ...
 
 
-function FT:InitializeSettings()
-    local category = Settings.RegisterVerticalLayoutCategory("ForeverTweaks")
+function FL:InitializeSettings()
+    local category = Settings.RegisterVerticalLayoutCategory("ForeverLite")
 
-    FT.settingsCategory = category
+    FL.settingsCategory = category
 
 
     -- Show health text
     local healthTextSetting = Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_NameplateHealthText",
+        "ForeverLite_NameplateHealthText",
         "healthText",
-        FT.db.nameplates,
+        FL.db.nameplates,
         Settings.VarType.Boolean,
         "Show health on nameplates",
         false
     )
 
     healthTextSetting:SetValueChangedCallback(function(_, value)
-        if FT.Nameplates then
-            FT.Nameplates:Refresh()
+        if FL.Nameplates then
+            FL.Nameplates:Refresh()
         end
     end)
 
@@ -34,9 +34,9 @@ function FT:InitializeSettings()
     -- Health format
     local healthFormatSetting = Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_NameplateHealthFormat",
+        "ForeverLite_NameplateHealthFormat",
         "healthFormat",
-        FT.db.nameplates,
+        FL.db.nameplates,
         Settings.VarType.String,
         "Health format",
         "remaining"
@@ -67,8 +67,8 @@ function FT:InitializeSettings()
     end
 
     healthFormatSetting:SetValueChangedCallback(function(_, value)
-        if FT.Nameplates then
-            FT.Nameplates:Refresh()
+        if FL.Nameplates then
+            FL.Nameplates:Refresh()
         end
     end)
 
@@ -85,9 +85,9 @@ function FT:InitializeSettings()
 
     local healthPositionSetting = Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_NameplateHealthPosition",
+        "ForeverLite_NameplateHealthPosition",
         "healthPosition",
-        FT.db.nameplates,
+        FL.db.nameplates,
         Settings.VarType.String,
         "Health position",
         "left"
@@ -112,8 +112,8 @@ function FT:InitializeSettings()
     end
 
     healthPositionSetting:SetValueChangedCallback(function(_, value)
-        if FT.Nameplates then
-            FT.Nameplates:Refresh()
+        if FL.Nameplates then
+            FL.Nameplates:Refresh()
         end
     end)
 
@@ -131,9 +131,9 @@ function FT:InitializeSettings()
     local experienceEnabledSetting =
         Settings.RegisterAddOnSetting(
             category,
-            "ForeverTweaks_ExperienceEnabled",
+            "ForeverLite_ExperienceEnabled",
             "enabled",
-            FT.db.experience,
+            FL.db.experience,
             Settings.VarType.Boolean,
             "Show XP tracker",
             false
@@ -141,8 +141,8 @@ function FT:InitializeSettings()
 
     experienceEnabledSetting:SetValueChangedCallback(
         function(_, value)
-            if FT.Experience then
-                FT.Experience:Refresh()
+            if FL.Experience then
+                FL.Experience:Refresh()
             end
         end
     )
@@ -156,9 +156,9 @@ Settings.CreateCheckbox(
 local showXPBarTextSetting =
     Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_ExperienceShowXPBarText",
+        "ForeverLite_ExperienceShowXPBarText",
         "showXPBarText",
-        FT.db.experience,
+        FL.db.experience,
         Settings.VarType.Boolean,
         "Always show XP bar text",
         C_CVar.GetCVarBool("xpBarText")
@@ -187,9 +187,9 @@ Settings.CreateCheckbox(
 local autoRepairSetting =
     Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_MerchantAutoRepair",
+        "ForeverLite_MerchantAutoRepair",
         "autoRepair",
-        FT.db.merchant,
+        FL.db.merchant,
         Settings.VarType.Boolean,
         "Automatically repair equipment",
         false
@@ -205,9 +205,9 @@ Settings.CreateCheckbox(
 local autoSellJunkSetting =
     Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_MerchantAutoSellJunk",
+        "ForeverLite_MerchantAutoSellJunk",
         "autoSellJunk",
-        FT.db.merchant,
+        FL.db.merchant,
         Settings.VarType.Boolean,
         "Automatically sell junk",
         false
@@ -227,9 +227,9 @@ Settings.CreateCheckbox(
 local colorPlayerClassSetting =
     Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_TooltipsColorPlayerClass",
+        "ForeverLite_TooltipsColorPlayerClass",
         "colorPlayerClass",
-        FT.db.tooltips,
+        FL.db.tooltips,
         Settings.VarType.Boolean,
         "Color player tooltips",
         false
@@ -249,9 +249,9 @@ Settings.CreateCheckbox(
 local remindersEnabledSetting =
     Settings.RegisterAddOnSetting(
         category,
-        "ForeverTweaks_RemindersEnabled",
+        "ForeverLite_RemindersEnabled",
         "enabled",
-        FT.db.reminders,
+        FL.db.reminders,
         Settings.VarType.Boolean,
         "Show missing buff reminders",
         false
@@ -259,8 +259,8 @@ local remindersEnabledSetting =
 
 remindersEnabledSetting:SetValueChangedCallback(
     function(_, value)
-        if FT.Reminders then
-            FT.Reminders:Refresh()
+        if FL.Reminders then
+            FL.Reminders:Refresh()
         end
     end
 )
@@ -277,8 +277,8 @@ Settings.RegisterAddOnCategory(category)
 end
 
 
-function FT:OpenSettings()
-    if FT.settingsCategory then
-        Settings.OpenToCategory(FT.settingsCategory:GetID())
+function FL:OpenSettings()
+    if FL.settingsCategory then
+        Settings.OpenToCategory(FL.settingsCategory:GetID())
     end
 end

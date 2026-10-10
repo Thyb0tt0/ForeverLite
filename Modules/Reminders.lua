@@ -1,8 +1,8 @@
-local _, FT = ...
+local _, FL = ...
 
-FT.Reminders = FT.Reminders or {}
+FL.Reminders = FL.Reminders or {}
 
-local Reminders = FT.Reminders
+local Reminders = FL.Reminders
 
 
 -- ------------------------------------------------------------
@@ -38,7 +38,7 @@ end
 
 local frame = CreateFrame(
     "Frame",
-    "ForeverTweaksReminderFrame",
+    "ForeverLiteReminderFrame",
     UIParent
 )
 
@@ -112,18 +112,18 @@ moveText:Hide()
 -- ------------------------------------------------------------
 
 local function ApplySavedPosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local db = FT.db.reminders
+    local db = FL.db.reminders
 
     frame:ClearAllPoints()
 
     frame:SetPoint(
-        db.point or "CENTER",
+        "CENTER",
         UIParent,
-        db.relativePoint or "CENTER",
+        "CENTER",
         db.x or 0,
         db.y or 120
     )
@@ -131,19 +131,33 @@ end
 
 
 local function SavePosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local point, _, relativePoint, x, y =
-        frame:GetPoint(1)
+    local frameX, frameY =
+        frame:GetCenter()
 
-    local db = FT.db.reminders
+    local uiX, uiY =
+        UIParent:GetCenter()
 
-    db.point = point or "CENTER"
-    db.relativePoint = relativePoint or "CENTER"
-    db.x = x or 0
-    db.y = y or 120
+    if not frameX
+        or not frameY
+        or not uiX
+        or not uiY then
+        return
+    end
+
+    local db = FL.db.reminders
+
+    db.point = "CENTER"
+    db.relativePoint = "CENTER"
+    db.x = frameX - uiX
+    db.y = frameY - uiY
+
+    -- Normalize the anchor immediately so resizing the
+    -- reminder group always happens around its center.
+    ApplySavedPosition()
 end
 
 
@@ -549,6 +563,11 @@ local function UpdateDisplay(reminders)
 
 
     if count == 0 then
+        frame:SetSize(
+            ICON_SIZE,
+            DISPLAY_HEIGHT
+        )
+
         if unlocked then
             frame:Show()
         else
@@ -557,6 +576,16 @@ local function UpdateDisplay(reminders)
 
         return
     end
+
+
+    local totalWidth =
+        (count * ICON_SIZE)
+        + ((count - 1) * ICON_GAP)
+
+    frame:SetSize(
+        totalWidth,
+        DISPLAY_HEIGHT
+    )
 
     frame:Show()
 end
@@ -567,8 +596,8 @@ end
 -- ------------------------------------------------------------
 
 function Reminders:Refresh()
-    if not FT.db
-        or not FT.db.reminders.enabled then
+    if not FL.db
+        or not FL.db.reminders.enabled then
 
         frame:Hide()
         return
@@ -614,11 +643,11 @@ end
 
 
 function Reminders:ResetPosition()
-    if not FT.db then
+    if not FL.db then
         return
     end
 
-    local db = FT.db.reminders
+    local db = FL.db.reminders
 
     db.point = "CENTER"
     db.relativePoint = "CENTER"
