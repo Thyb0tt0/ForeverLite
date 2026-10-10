@@ -533,7 +533,7 @@ local function GetMissingReminders()
                 },
                 "BUFF!"
             )
-
+        
     
     elseif class == "ROGUE" then
 
@@ -541,6 +541,81 @@ local function GetMissingReminders()
             reminders
         )
 
+        elseif class == "PALADIN" then
+
+        -- Any Paladin Aura satisfies this reminder.
+        -- Devotion Aura is used as the reminder icon.
+        AddSpellReminder(
+            reminders,
+            {
+                10293, -- Devotion Aura Rank 7
+                10292, -- Rank 6
+                1032,  -- Rank 5
+                10291, -- Rank 4
+                643,   -- Rank 3
+                10290, -- Rank 2
+                465,   -- Rank 1
+            },
+            {
+                465,   -- Devotion Aura
+                7294,  -- Retribution Aura
+                19746, -- Concentration Aura
+                19876, -- Shadow Resistance Aura
+                19888, -- Frost Resistance Aura
+                19891, -- Fire Resistance Aura
+            },
+            "BUFF!"
+        )
+
+
+        -- Any normal long-duration Blessing satisfies this reminder.
+        --
+        -- Short situational Blessings such as Protection,
+        -- Freedom, and Sacrifice deliberately do not count.
+        AddSpellReminder(
+            reminders,
+            {
+                -- Blessing of Might
+                25291,
+                19838,
+                19837,
+                19836,
+                19835,
+                19834,
+                19740,
+
+                -- Blessing of Wisdom
+                25290,
+                19854,
+                19853,
+                19852,
+                19850,
+                19742,
+
+                -- Other long-duration Blessings
+                20217, -- Kings
+                1038,  -- Salvation
+                19979, -- Light Rank 3
+                19978, -- Light Rank 2
+                19977, -- Light Rank 1
+            },
+            {
+                -- Normal Blessings
+                19740, -- Might
+                19742, -- Wisdom
+                20217, -- Kings
+                1038,  -- Salvation
+                19977, -- Light
+
+                -- Greater Blessings
+                25782, -- Greater Might
+                25894, -- Greater Wisdom
+                25898, -- Greater Kings
+                25895, -- Greater Salvation
+                25890, -- Greater Light
+            },
+            "BUFF!"
+        )
 
     elseif class == "WARRIOR" then
 
