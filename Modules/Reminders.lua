@@ -15,7 +15,12 @@ local DISPLAY_HEIGHT = 70
 local MAX_REMINDERS = 3
 
 local unlocked = false
-local battleShoutCastThisCombat = false
+
+local battleShoutExpiresAt = 0
+local battleShoutTimerToken = 0
+
+local auraStateCache = {}
+local auraNameToCacheKey = {}
 
 
 local BATTLE_SHOUT_SPELLS = {
@@ -28,6 +33,9 @@ local BATTLE_SHOUT_SPELLS = {
     6673,  -- Rank 1
 }
 
+local DEFAULT_BATTLE_SHOUT_DURATION = 180
+local battleShoutDuration =
+    DEFAULT_BATTLE_SHOUT_DURATION
 
 local BATTLE_SHOUT_LOOKUP = {}
 
@@ -278,10 +286,63 @@ local function GetKnownSpell(spellIDs)
 end
 
 
-local function HasAnyAura(spellIDs)
+local function GetAuraCacheKey(spellIDs)
+    return table.concat(
+        spellIDs,
+        ":"
+    )
+end
+
+
+local function RegisterAuraNames(
+    spellIDs,
+    cacheKey
+)
     for _, spellID in ipairs(spellIDs) do
         local spellName =
-            C_Spell.GetSpellName(spellID)
+            C_Spell.GetSpellName(
+                spellID
+            )
+
+        if spellName then
+            auraNameToCacheKey[spellName] =
+                cacheKey
+        end
+    end
+end
+
+
+local function HasAnyAura(
+    spellIDs,
+    cacheKey
+)
+    cacheKey =
+        cacheKey
+        or GetAuraCacheKey(
+            spellIDs
+        )
+
+    -- Aura information is restricted during combat.
+    -- Use the last trustworthy state instead.
+    if UnitAffectingCombat("player") then
+        local cachedState =
+            auraStateCache[cacheKey]
+
+        -- If combat somehow began before we ever got
+        -- a trustworthy reading, avoid a false warning.
+        if cachedState == nil then
+            return true
+        end
+
+        return cachedState
+    end
+
+
+    for _, spellID in ipairs(spellIDs) do
+        local spellName =
+            C_Spell.GetSpellName(
+                spellID
+            )
 
         if spellName then
             local aura =
@@ -292,11 +353,14 @@ local function HasAnyAura(spellIDs)
                 )
 
             if aura then
+                auraStateCache[cacheKey] = true
                 return true
             end
         end
     end
 
+
+    auraStateCache[cacheKey] = false
     return false
 end
 
@@ -308,15 +372,40 @@ local function AddSpellReminder(
     label
 )
     local knownSpell =
-        GetKnownSpell(knownSpellIDs)
+        GetKnownSpell(
+            knownSpellIDs
+        )
 
     if not knownSpell then
         return
     end
 
-    if HasAnyAura(auraSpellIDs) then
+
+    local cacheKey =
+        GetAuraCacheKey(
+            auraSpellIDs
+        )
+
+    -- Register spell names so successful casts can
+    -- update the cached state during combat.
+    RegisterAuraNames(
+        knownSpellIDs,
+        cacheKey
+    )
+
+    RegisterAuraNames(
+        auraSpellIDs,
+        cacheKey
+    )
+
+
+    if HasAnyAura(
+        auraSpellIDs,
+        cacheKey
+    ) then
         return
     end
+
 
     local icon =
         C_Spell.GetSpellTexture(
@@ -327,11 +416,160 @@ local function AddSpellReminder(
         return
     end
 
+
     table.insert(
         reminders,
         {
             icon = icon,
             label = label or "BUFF!",
+        }
+    )
+end
+
+
+-- ------------------------------------------------------------
+-- Warrior Battle Shout
+-- ------------------------------------------------------------
+
+local function UpdateBattleShoutState()
+    local spellName =
+        C_Spell.GetSpellName(
+            6673
+        )
+
+    if not spellName then
+        battleShoutExpiresAt = 0
+        return
+    end
+
+
+    local aura =
+        C_UnitAuras.GetAuraDataBySpellName(
+            "player",
+            spellName,
+            "HELPFUL"
+        )
+
+    if not aura then
+        battleShoutExpiresAt = 0
+        return
+    end
+
+
+    local duration =
+        aura.duration
+
+    if duration
+        and (
+            not issecretvalue
+            or not issecretvalue(
+                duration
+            )
+        )
+        and type(duration) == "number"
+        and duration > 0 then
+
+        battleShoutDuration =
+            duration
+    end
+
+
+    local expirationTime =
+        aura.expirationTime
+
+    if expirationTime
+        and (
+            not issecretvalue
+            or not issecretvalue(
+                expirationTime
+            )
+        )
+        and type(expirationTime) == "number"
+        and expirationTime > 0 then
+
+        battleShoutExpiresAt =
+            expirationTime
+    else
+        -- Fallback if Forever does not expose the
+        -- expiration timestamp for some reason.
+        battleShoutExpiresAt =
+            GetTime()
+            + battleShoutDuration
+    end
+end
+
+
+local function ScheduleBattleShoutExpiry()
+    battleShoutTimerToken =
+        battleShoutTimerToken + 1
+
+    local timerToken =
+        battleShoutTimerToken
+
+    local delay =
+        battleShoutExpiresAt
+        - GetTime()
+
+    if delay <= 0 then
+        return
+    end
+
+
+    C_Timer.After(
+        delay + 0.05,
+        function()
+            if timerToken
+                ~= battleShoutTimerToken then
+
+                return
+            end
+
+            if UnitAffectingCombat(
+                "player"
+            ) then
+
+                Reminders:Refresh()
+            end
+        end
+    )
+end
+
+
+local function AddBattleShoutReminder(
+    reminders
+)
+    local knownSpell =
+        GetKnownSpell(
+            BATTLE_SHOUT_SPELLS
+        )
+
+    if not knownSpell then
+        return
+    end
+
+
+    if battleShoutExpiresAt
+        > GetTime() then
+
+        return
+    end
+
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            knownSpell
+        )
+
+    if not icon then
+        return
+    end
+
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "BUFF!",
         }
     )
 end
@@ -502,6 +740,111 @@ local function AddShamanWeaponReminder(reminders)
 end
 
 -- ------------------------------------------------------------
+-- Hunter
+-- ------------------------------------------------------------
+
+local HUNTER_CALL_PET_SPELL_ID = 883
+
+local HUNTER_LONE_WOLF_SPELLS = {
+    415370,
+    409979,
+}
+
+
+local HUNTER_ASPECT_KNOWN_SPELLS = {
+    -- Aspect of the Monkey
+    13163,
+
+    -- Aspect of the Hawk
+    25296,
+    14322,
+    14321,
+    14320,
+    14319,
+    14318,
+    13165,
+
+    -- Aspect of the Cheetah
+    5118,
+
+    -- Aspect of the Pack
+    13159,
+
+    -- Aspect of the Wild
+    20190,
+    20043,
+
+    -- Aspect of the Beast
+    1299447,
+    1299446,
+    1299445,
+    13161,
+
+    -- Forever Aspects
+    469145, -- Aspect of the Falcon
+    415423, -- Aspect of the Viper
+}
+
+
+local HUNTER_ASPECT_AURAS = {
+    13163,  -- Monkey
+    13165,  -- Hawk
+    5118,   -- Cheetah
+    13159,  -- Pack
+    20043,  -- Wild
+    13161,  -- Beast
+    469145, -- Falcon
+    415423, -- Viper
+}
+
+
+local function HasLoneWolf()
+    return GetKnownSpell(
+        HUNTER_LONE_WOLF_SPELLS
+    ) ~= nil
+end
+
+
+local function AddHunterPetReminder(reminders)
+    -- Do not remind before the Hunter has unlocked
+    -- the normal pet system.
+    if not C_SpellBook.IsSpellKnown(
+        HUNTER_CALL_PET_SPELL_ID
+    ) then
+        return
+    end
+
+    -- Lone Wolf intentionally plays without a pet.
+    if HasLoneWolf() then
+        return
+    end
+
+    -- A living active pet means everything is fine.
+    if UnitExists("pet")
+        and not UnitIsDeadOrGhost("pet") then
+
+        return
+    end
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            HUNTER_CALL_PET_SPELL_ID
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "PET!",
+        }
+    )
+end
+
+-- ------------------------------------------------------------
 -- Class reminders
 -- ------------------------------------------------------------
 
@@ -560,50 +903,68 @@ local function GetMissingReminders()
         )
 
     
-        elseif class == "DRUID" then
+    elseif class == "DRUID" then
 
-            -- Mark of the Wild.
-            -- Gift of the Wild also satisfies this reminder.
-            AddSpellReminder(
-                reminders,
-                {
-                    9885, -- Rank 7
-                    9884, -- Rank 6
-                    8907, -- Rank 5
-                    5234, -- Rank 4
-                    6756, -- Rank 3
-                    5232, -- Rank 2
-                    1126, -- Rank 1
-                },
-                {
-                    1126,  -- Mark of the Wild
-                    21849, -- Gift of the Wild
-                },
-                "BUFF!"
-            )
+        -- Mark of the Wild.
+        -- Gift of the Wild also satisfies this reminder.
+        AddSpellReminder(
+            reminders,
+            {
+                9885, -- Rank 7
+                9884, -- Rank 6
+                8907, -- Rank 5
+                5234, -- Rank 4
+                6756, -- Rank 3
+                5232, -- Rank 2
+                1126, -- Rank 1
+            },
+            {
+                1126,  -- Mark of the Wild
+                21849, -- Gift of the Wild
+            },
+            "BUFF!"
+        )
+        
+
+    elseif class == "HUNTER" then
+
+        -- Any active Aspect satisfies this reminder.
+        AddSpellReminder(
+            reminders,
+            HUNTER_ASPECT_KNOWN_SPELLS,
+            HUNTER_ASPECT_AURAS,
+            "ASPECT!"
+        )
 
 
-        elseif class == "WARLOCK" then
+        -- Keep a living pet active unless Lone Wolf
+        -- is selected.
+        AddHunterPetReminder(
+            reminders
+        )
 
-            -- Demon Skin / Demon Armor.
-            -- Either one satisfies the reminder.
-            AddSpellReminder(
-                reminders,
-                {
-                    11735, -- Demon Armor Rank 5
-                    11734, -- Demon Armor Rank 4
-                    11733, -- Demon Armor Rank 3
-                    1086,  -- Demon Armor Rank 2
-                    706,   -- Demon Armor Rank 1
-                    696,   -- Demon Skin Rank 2
-                    687,   -- Demon Skin Rank 1
-                },
-                {
-                    706, -- Demon Armor
-                    687, -- Demon Skin
-                },
-                "BUFF!"
-            )
+
+    elseif class == "WARLOCK" then
+
+        -- Demon Skin / Demon Armor.
+        -- Either one satisfies the reminder.
+        AddSpellReminder(
+            reminders,
+            {
+                11735, -- Demon Armor Rank 5
+                11734, -- Demon Armor Rank 4
+                11733, -- Demon Armor Rank 3
+                1086,  -- Demon Armor Rank 2
+                706,   -- Demon Armor Rank 1
+                696,   -- Demon Skin Rank 2
+                687,   -- Demon Skin Rank 1
+            },
+            {
+                706, -- Demon Armor
+                687, -- Demon Skin
+            },
+            "BUFF!"
+        )
         
     
     elseif class == "ROGUE" then
@@ -612,122 +973,126 @@ local function GetMissingReminders()
             reminders
         )
 
-        elseif class == "PALADIN" then
+    elseif class == "PALADIN" then
 
-        -- Any Paladin Aura satisfies this reminder.
-        -- Devotion Aura is used as the reminder icon.
-        AddSpellReminder(
-            reminders,
-            {
-                10293, -- Devotion Aura Rank 7
-                10292, -- Rank 6
-                1032,  -- Rank 5
-                10291, -- Rank 4
-                643,   -- Rank 3
-                10290, -- Rank 2
-                465,   -- Rank 1
-            },
-            {
-                465,   -- Devotion Aura
-                7294,  -- Retribution Aura
-                19746, -- Concentration Aura
-                19876, -- Shadow Resistance Aura
-                19888, -- Frost Resistance Aura
-                19891, -- Fire Resistance Aura
-            },
-            "BUFF!"
-        )
+    -- Any Paladin Aura satisfies this reminder.
+    -- Devotion Aura is used as the reminder icon.
+    AddSpellReminder(
+        reminders,
+        {
+            10293, -- Devotion Aura Rank 7
+            10292, -- Rank 6
+            1032,  -- Rank 5
+            10291, -- Rank 4
+            643,   -- Rank 3
+            10290, -- Rank 2
+            465,   -- Rank 1
+        },
+        {
+            465,   -- Devotion Aura
+            7294,  -- Retribution Aura
+            19746, -- Concentration Aura
+            19876, -- Shadow Resistance Aura
+            19888, -- Frost Resistance Aura
+            19891, -- Fire Resistance Aura
+        },
+        "BUFF!"
+    )
 
 
-        -- Any normal long-duration Blessing satisfies this reminder.
-        --
-        -- Short situational Blessings such as Protection,
-        -- Freedom, and Sacrifice deliberately do not count.
-        AddSpellReminder(
-            reminders,
-            {
-                -- Blessing of Might
-                25291,
-                19838,
-                19837,
-                19836,
-                19835,
-                19834,
-                19740,
+    -- Any normal long-duration Blessing satisfies this reminder.
+    --
+    -- Short situational Blessings such as Protection,
+    -- Freedom, and Sacrifice deliberately do not count.
+    AddSpellReminder(
+        reminders,
+        {
+            -- Blessing of Might
+            25291,
+            19838,
+            19837,
+            19836,
+            19835,
+            19834,
+            19740,
 
-                -- Blessing of Wisdom
-                25290,
-                19854,
-                19853,
-                19852,
-                19850,
-                19742,
+            -- Blessing of Wisdom
+            25290,
+            19854,
+            19853,
+            19852,
+            19850,
+            19742,
 
-                -- Other long-duration Blessings
-                20217, -- Kings
-                1038,  -- Salvation
-                19979, -- Light Rank 3
-                19978, -- Light Rank 2
-                19977, -- Light Rank 1
-            },
-            {
-                -- Normal Blessings
-                19740, -- Might
-                19742, -- Wisdom
-                20217, -- Kings
-                1038,  -- Salvation
-                19977, -- Light
+            -- Other long-duration Blessings
+            20217, -- Kings
+            1038,  -- Salvation
+            19979, -- Light Rank 3
+            19978, -- Light Rank 2
+            19977, -- Light Rank 1
+        },
+        {
+            -- Normal Blessings
+            19740, -- Might
+            19742, -- Wisdom
+            20217, -- Kings
+            1038,  -- Salvation
+            19977, -- Light
 
-                -- Greater Blessings
-                25782, -- Greater Might
-                25894, -- Greater Wisdom
-                25898, -- Greater Kings
-                25895, -- Greater Salvation
-                25890, -- Greater Light
-            },
-            "BUFF!"
-        )
+            -- Greater Blessings
+            25782, -- Greater Might
+            25894, -- Greater Wisdom
+            25898, -- Greater Kings
+            25895, -- Greater Salvation
+            25890, -- Greater Light
+        },
+        "BUFF!"
+    )
     
-        elseif class == "SHAMAN" then
+    elseif class == "SHAMAN" then
 
-            -- Keep a temporary imbue on the main-hand weapon.
-            AddShamanWeaponReminder(
-                reminders
-            )
+        -- Keep a temporary imbue on the main-hand weapon.
+        AddShamanWeaponReminder(
+            reminders
+        )
 
 
-            -- Keep an Elemental Shield active.
-            -- Water Shield and Earth Shield also satisfy
-            -- the reminder when present on the player.
-            AddSpellReminder(
-                reminders,
-                {
-                    10432, -- Lightning Shield Rank 7
-                    10431, -- Rank 6
-                    8134,  -- Rank 5
-                    945,   -- Rank 4
-                    905,   -- Rank 3
-                    325,   -- Rank 2
-                    324,   -- Rank 1
-                },
-                {
-                    324,    -- Lightning Shield
-                    408510, -- Water Shield
-                    408514, -- Earth Shield
-                },
-                "BUFF!"
-            )
+        -- Keep an Elemental Shield active.
+        -- Water Shield and Earth Shield also satisfy
+        -- the reminder when present on the player.
+        AddSpellReminder(
+            reminders,
+            {
+                10432, -- Lightning Shield Rank 7
+                10431, -- Rank 6
+                8134,  -- Rank 5
+                945,   -- Rank 4
+                905,   -- Rank 3
+                325,   -- Rank 2
+                324,   -- Rank 1
+            },
+            {
+                324,    -- Lightning Shield
+                408510, -- Water Shield
+                408514, -- Earth Shield
+            },
+            "BUFF!"
+        )
 
     elseif class == "WARRIOR" then
 
-        if UnitAffectingCombat("player")
-            and not battleShoutCastThisCombat then
+        if not UnitAffectingCombat(
+            "player"
+        ) then
 
-            AddSpellReminder(
-                reminders,
-                BATTLE_SHOUT_SPELLS,
-                { 6673 },
-                "BUFF!"
+            -- Aura information is trustworthy here,
+            -- so remember the real expiration time.
+            UpdateBattleShoutState()
+
+
+        else
+            AddBattleShoutReminder(
+                reminders
             )
         end
     end
@@ -918,6 +1283,20 @@ eventFrame:RegisterUnitEvent(
     "player"
 )
 
+eventFrame:RegisterUnitEvent(
+    "UNIT_PET",
+    "player"
+)
+
+eventFrame:RegisterUnitEvent(
+    "UNIT_HEALTH",
+    "pet"
+)
+
+eventFrame:RegisterEvent(
+    "TRAIT_CONFIG_UPDATED"
+)
+
 
 eventFrame:SetScript(
     "OnEvent",
@@ -929,13 +1308,15 @@ eventFrame:SetScript(
 
 
         elseif event == "PLAYER_REGEN_DISABLED" then
-            battleShoutCastThisCombat = false
+            ScheduleBattleShoutExpiry()
 
             Reminders:Refresh()
 
 
         elseif event == "PLAYER_REGEN_ENABLED" then
-            battleShoutCastThisCombat = false
+            -- Invalidate any pending combat expiry timer.
+            battleShoutTimerToken =
+                battleShoutTimerToken + 1
 
             Reminders:Refresh()
 
@@ -943,12 +1324,43 @@ eventFrame:SetScript(
         elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
             local unit, _, spellID = ...
 
-            if unit == "player"
-                and BATTLE_SHOUT_LOOKUP[spellID] then
+            if unit == "player" then
+                local shouldRefresh = false
 
-                battleShoutCastThisCombat = true
 
-                Reminders:Refresh()
+                if BATTLE_SHOUT_LOOKUP[spellID] then
+                    battleShoutExpiresAt =
+                        GetTime()
+                        + battleShoutDuration
+
+                    if UnitAffectingCombat(
+                        "player"
+                    ) then
+                        ScheduleBattleShoutExpiry()
+                    end
+
+                    shouldRefresh = true
+                end
+
+
+                local spellName =
+                    C_Spell.GetSpellName(
+                        spellID
+                    )
+
+                local cacheKey =
+                    spellName
+                    and auraNameToCacheKey[spellName]
+
+                if cacheKey then
+                    auraStateCache[cacheKey] = true
+                    shouldRefresh = true
+                end
+
+
+                if shouldRefresh then
+                    Reminders:Refresh()
+                end
             end
 
 
