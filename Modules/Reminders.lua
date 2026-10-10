@@ -488,7 +488,53 @@ local function GetMissingReminders()
             "BUFF!"
         )
 
+    
+        elseif class == "DRUID" then
 
+            -- Mark of the Wild.
+            -- Gift of the Wild also satisfies this reminder.
+            AddSpellReminder(
+                reminders,
+                {
+                    9885, -- Rank 7
+                    9884, -- Rank 6
+                    8907, -- Rank 5
+                    5234, -- Rank 4
+                    6756, -- Rank 3
+                    5232, -- Rank 2
+                    1126, -- Rank 1
+                },
+                {
+                    1126,  -- Mark of the Wild
+                    21849, -- Gift of the Wild
+                },
+                "BUFF!"
+            )
+
+
+        elseif class == "WARLOCK" then
+
+            -- Demon Skin / Demon Armor.
+            -- Either one satisfies the reminder.
+            AddSpellReminder(
+                reminders,
+                {
+                    11735, -- Demon Armor Rank 5
+                    11734, -- Demon Armor Rank 4
+                    11733, -- Demon Armor Rank 3
+                    1086,  -- Demon Armor Rank 2
+                    706,   -- Demon Armor Rank 1
+                    696,   -- Demon Skin Rank 2
+                    687,   -- Demon Skin Rank 1
+                },
+                {
+                    706, -- Demon Armor
+                    687, -- Demon Skin
+                },
+                "BUFF!"
+            )
+
+    
     elseif class == "ROGUE" then
 
         AddRogueReminder(
