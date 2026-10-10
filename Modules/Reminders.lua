@@ -429,6 +429,77 @@ local function AddRogueReminder(reminders)
     )
 end
 
+-- ------------------------------------------------------------
+-- Shaman weapon imbue
+-- ------------------------------------------------------------
+
+local SHAMAN_WEAPON_IMBUE_SPELLS = {
+    -- Windfury Weapon
+    16362,
+    10486,
+    8235,
+    8232,
+
+    -- Flametongue Weapon
+    16342,
+    16341,
+    16339,
+    8030,
+    8027,
+    8024,
+
+    -- Frostbrand Weapon
+    16356,
+    16355,
+    10456,
+    8038,
+    8033,
+
+    -- Rockbiter Weapon
+    16316,
+    16315,
+    16314,
+    10399,
+    8019,
+    8018,
+    8017,
+}
+
+
+local function AddShamanWeaponReminder(reminders)
+    local knownImbue =
+        GetKnownSpell(
+            SHAMAN_WEAPON_IMBUE_SPELLS
+        )
+
+    if not knownImbue then
+        return
+    end
+
+    if not WeaponNeedsTemporaryEnchant(
+        16,
+        Enum.WeaponSlot.MainHand
+    ) then
+        return
+    end
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            knownImbue
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "IMBUE!",
+        }
+    )
+end
 
 -- ------------------------------------------------------------
 -- Class reminders
@@ -616,6 +687,36 @@ local function GetMissingReminders()
             },
             "BUFF!"
         )
+    
+        elseif class == "SHAMAN" then
+
+            -- Keep a temporary imbue on the main-hand weapon.
+            AddShamanWeaponReminder(
+                reminders
+            )
+
+
+            -- Keep an Elemental Shield active.
+            -- Water Shield and Earth Shield also satisfy
+            -- the reminder when present on the player.
+            AddSpellReminder(
+                reminders,
+                {
+                    10432, -- Lightning Shield Rank 7
+                    10431, -- Rank 6
+                    8134,  -- Rank 5
+                    945,   -- Rank 4
+                    905,   -- Rank 3
+                    325,   -- Rank 2
+                    324,   -- Rank 1
+                },
+                {
+                    324,    -- Lightning Shield
+                    408510, -- Water Shield
+                    408514, -- Earth Shield
+                },
+                "BUFF!"
+            )
 
     elseif class == "WARRIOR" then
 
