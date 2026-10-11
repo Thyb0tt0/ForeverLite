@@ -24,6 +24,10 @@ local function InitializeDatabase()
         ForeverLiteDB.nameplates.healthPosition = "left"
     end
 
+    if ForeverLiteDB.nameplates.normalSelectedScale == nil then
+        ForeverLiteDB.nameplates.normalSelectedScale = false
+    end
+
     ForeverLiteDB.experience = ForeverLiteDB.experience or {}
 
     if ForeverLiteDB.experience.enabled == nil then
@@ -297,6 +301,10 @@ eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
     end
 
     InitializeDatabase()
+
+    if FL.Nameplates then
+        FL.Nameplates:ApplySelectedScale()
+    end
 
     if FL.InitializeSettings then
         FL:InitializeSettings()

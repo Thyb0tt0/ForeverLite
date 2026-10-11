@@ -30,6 +30,34 @@ function FL:InitializeSettings()
         "Displays the unit's health directly on its nameplate."
     )
 
+    -- Keep selected nameplates at normal size
+    local normalSelectedScaleSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_NameplateNormalSelectedScale",
+            "normalSelectedScale",
+            FL.db.nameplates,
+            Settings.VarType.Boolean,
+            "Normal selected nameplate size",
+            false
+        )
+
+    normalSelectedScaleSetting:SetValueChangedCallback(
+        function(_, value)
+            if FL.Nameplates then
+                FL.Nameplates:ApplySelectedScale(
+                    value,
+                    true
+                )
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        normalSelectedScaleSetting,
+        "Prevents your current target's nameplate from becoming larger than other nameplates."
+    )
 
     -- Health format
     local healthFormatSetting = Settings.RegisterAddOnSetting(

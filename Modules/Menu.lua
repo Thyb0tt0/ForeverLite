@@ -145,10 +145,10 @@ local titleText =
     )
 
 titleText:SetPoint(
-    "LEFT",
+    "CENTER",
     titleBar,
-    "LEFT",
-    10,
+    "CENTER",
+    0,
     0
 )
 
@@ -499,6 +499,18 @@ local healthCheckbox =
     )
 
 
+local normalSelectedScaleCheckbox =
+    AddCheckboxRow(
+        "Normal selected nameplate size",
+        function(value)
+            SetSetting(
+                "ForeverLite_NameplateNormalSelectedScale",
+                value
+            )
+        end
+    )
+
+
 local healthFormatDropdown =
     AddDropdownRow(
         "Health format",
@@ -743,7 +755,7 @@ local settingsButton = CreateFrame(
 )
 
 settingsButton:SetSize(
-    135,
+    105,
     24
 )
 
@@ -756,7 +768,7 @@ settingsButton:SetPoint(
 )
 
 settingsButton:SetText(
-    "Addon Settings"
+    "Settings"
 )
 
 settingsButton:SetScript(
@@ -810,6 +822,10 @@ function Menu:Refresh()
 
     healthCheckbox:SetChecked(
         FL.db.nameplates.healthText
+    )
+
+    normalSelectedScaleCheckbox:SetChecked(
+        FL.db.nameplates.normalSelectedScale
     )
 
     experienceCheckbox:SetChecked(

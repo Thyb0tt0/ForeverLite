@@ -4,6 +4,10 @@ FL.Nameplates = FL.Nameplates or {}
 
 local Nameplates = FL.Nameplates
 
+local SELECTED_SCALE_CVAR =
+    "nameplateSelectedScale"
+
+local NORMAL_SELECTED_SCALE = 1
 
 -- ------------------------------------------------------------
 -- Helpers
@@ -98,15 +102,22 @@ end
 -- ------------------------------------------------------------
 
 local function UpdateHealthText(unit)
-    if not FL.db then
-        return
-    end
-
     if not IsNamePlateUnit(unit) then
         return
     end
 
+    if not FL.db then
+        return
+    end
+
     if not FL.db.nameplates.healthText then
+        HideHealthText(unit)
+        return
+    end
+
+    -- Health text is intended for hostile/attackable nameplates.
+    -- Friendly nameplates may still be enabled for names/class colors.
+    if not UnitCanAttack("player", unit) then
         HideHealthText(unit)
         return
     end
@@ -162,6 +173,50 @@ end
 -- ------------------------------------------------------------
 -- Refresh currently visible nameplates
 -- ------------------------------------------------------------
+
+function Nameplates:ApplySelectedScale(
+    enabled,
+    restoreDefault
+)
+    if enabled == nil then
+        if not FL.db then
+            return
+        end
+
+        enabled =
+            FL.db.nameplates.normalSelectedScale
+    end
+
+
+    if enabled then
+        C_CVar.SetCVar(
+            SELECTED_SCALE_CVAR,
+            NORMAL_SELECTED_SCALE
+        )
+
+        return
+    end
+
+
+    -- Do not touch the CVar merely because the feature
+    -- is disabled. This keeps fresh installs neutral.
+    if not restoreDefault then
+        return
+    end
+
+
+    local defaultValue =
+        C_CVar.GetCVarDefault(
+            SELECTED_SCALE_CVAR
+        )
+
+    if defaultValue then
+        C_CVar.SetCVar(
+            SELECTED_SCALE_CVAR,
+            defaultValue
+        )
+    end
+end
 
 function Nameplates:Refresh()
     if not FL.db then
