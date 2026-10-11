@@ -167,7 +167,7 @@ eventFrame:RegisterEvent("MERCHANT_SHOW")
 
 eventFrame:SetScript(
     "OnEvent",
-    function(self, event)
+    function(_, event)
         if event == "MERCHANT_SHOW" then
             AutoRepair()
             AutoSellJunk()

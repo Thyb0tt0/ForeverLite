@@ -1,4 +1,4 @@
-local addonName, FL = ...
+local _, FL = ...
 
 FL.Experience = FL.Experience or {}
 
@@ -203,6 +203,7 @@ local function FormatTime(seconds)
     )
 end
 
+
 local function FormatElapsed(seconds)
     seconds = math.floor(seconds)
 
@@ -391,7 +392,7 @@ end
 -- Display updates
 -- ------------------------------------------------------------
 
-frame:SetScript("OnUpdate", function(self, elapsed)
+frame:SetScript("OnUpdate", function(_, elapsed)
     updateAccumulator =
         updateAccumulator + elapsed
 
@@ -419,7 +420,7 @@ eventFrame:RegisterEvent("PLAYER_LEVEL_UP")
 
 eventFrame:SetScript(
     "OnEvent",
-    function(self, event, ...)
+    function(_, event, ...)
         if event == "PLAYER_LOGIN" then
             lastXP = UnitXP("player")
 

@@ -1,4 +1,4 @@
-local addonName, FL = ...
+local _, FL = ...
 
 FL.Nameplates = FL.Nameplates or {}
 
@@ -171,7 +171,7 @@ end
 
 
 -- ------------------------------------------------------------
--- Refresh currently visible nameplates
+-- Selected nameplate scale
 -- ------------------------------------------------------------
 
 function Nameplates:ApplySelectedScale(
@@ -218,6 +218,11 @@ function Nameplates:ApplySelectedScale(
     end
 end
 
+
+-- ------------------------------------------------------------
+-- Refresh currently visible nameplates
+-- ------------------------------------------------------------
+
 function Nameplates:Refresh()
     if not FL.db then
         return
@@ -253,7 +258,7 @@ eventFrame:RegisterEvent("NAME_PLATE_UNIT_ADDED")
 eventFrame:RegisterEvent("NAME_PLATE_UNIT_REMOVED")
 eventFrame:RegisterEvent("UNIT_HEALTH")
 
-eventFrame:SetScript("OnEvent", function(self, event, ...)
+eventFrame:SetScript("OnEvent", function(_, event, ...)
     if event == "NAME_PLATE_UNIT_ADDED" then
         local unit = ...
         UpdateHealthText(unit)

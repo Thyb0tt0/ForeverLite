@@ -2,8 +2,6 @@ local _, FL = ...
 
 FL.Tooltips = FL.Tooltips or {}
 
-local Tooltips = FL.Tooltips
-
 
 -- ------------------------------------------------------------
 -- Helpers
@@ -51,7 +49,6 @@ local function GetGuildColor()
 
     return color.r, color.g, color.b
 end
-
 
 
 local function StyleGuild(
@@ -165,7 +162,6 @@ local function EnhancePlayerTooltip(
     if not tooltipName then
         return
     end
-
 
 
     -- --------------------------------------------------------

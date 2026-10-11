@@ -1,4 +1,4 @@
-local addonName, FL = ...
+local _, FL = ...
 
 
 function FL:InitializeSettings()
@@ -7,7 +7,10 @@ function FL:InitializeSettings()
     FL.settingsCategory = category
 
 
-    -- Show health text
+    -- --------------------------------------------------------
+    -- Nameplates
+    -- --------------------------------------------------------
+
     local healthTextSetting = Settings.RegisterAddOnSetting(
         category,
         "ForeverLite_NameplateHealthText",
@@ -18,11 +21,13 @@ function FL:InitializeSettings()
         false
     )
 
-    healthTextSetting:SetValueChangedCallback(function(_, value)
-        if FL.Nameplates then
-            FL.Nameplates:Refresh()
+    healthTextSetting:SetValueChangedCallback(
+        function()
+            if FL.Nameplates then
+                FL.Nameplates:Refresh()
+            end
         end
-    end)
+    )
 
     Settings.CreateCheckbox(
         category,
@@ -30,7 +35,7 @@ function FL:InitializeSettings()
         "Displays the unit's health directly on its nameplate."
     )
 
-    -- Keep selected nameplates at normal size
+
     local normalSelectedScaleSetting =
         Settings.RegisterAddOnSetting(
             category,
@@ -59,7 +64,7 @@ function FL:InitializeSettings()
         "Prevents your current target's nameplate from becoming larger than other nameplates."
     )
 
-    -- Health format
+
     local healthFormatSetting = Settings.RegisterAddOnSetting(
         category,
         "ForeverLite_NameplateHealthFormat",
@@ -94,11 +99,13 @@ function FL:InitializeSettings()
         return container:GetData()
     end
 
-    healthFormatSetting:SetValueChangedCallback(function(_, value)
-        if FL.Nameplates then
-            FL.Nameplates:Refresh()
+    healthFormatSetting:SetValueChangedCallback(
+        function()
+            if FL.Nameplates then
+                FL.Nameplates:Refresh()
+            end
         end
-    end)
+    )
 
     Settings.CreateDropdown(
         category,
@@ -107,9 +114,6 @@ function FL:InitializeSettings()
         "Choose how health is displayed on nameplates."
     )
 
-    -- --------------------------------------------------------
-    -- Health position
-    -- --------------------------------------------------------
 
     local healthPositionSetting = Settings.RegisterAddOnSetting(
         category,
@@ -139,11 +143,13 @@ function FL:InitializeSettings()
         return container:GetData()
     end
 
-    healthPositionSetting:SetValueChangedCallback(function(_, value)
-        if FL.Nameplates then
-            FL.Nameplates:Refresh()
+    healthPositionSetting:SetValueChangedCallback(
+        function()
+            if FL.Nameplates then
+                FL.Nameplates:Refresh()
+            end
         end
-    end)
+    )
 
     Settings.CreateDropdown(
         category,
@@ -152,8 +158,9 @@ function FL:InitializeSettings()
         "Choose where health is displayed on the nameplate."
     )
 
+
     -- --------------------------------------------------------
-    -- XP tracker
+    -- Experience
     -- --------------------------------------------------------
 
     local experienceEnabledSetting =
@@ -168,145 +175,147 @@ function FL:InitializeSettings()
         )
 
     experienceEnabledSetting:SetValueChangedCallback(
-        function(_, value)
+        function()
             if FL.Experience then
                 FL.Experience:Refresh()
             end
         end
     )
 
-Settings.CreateCheckbox(
-    category,
-    experienceEnabledSetting,
-    "Shows your session XP per hour and estimated time to level."
-)
-
-local showXPBarTextSetting =
-    Settings.RegisterAddOnSetting(
+    Settings.CreateCheckbox(
         category,
-        "ForeverLite_ExperienceShowXPBarText",
-        "showXPBarText",
-        FL.db.experience,
-        Settings.VarType.Boolean,
-        "Always show XP bar text",
-        C_CVar.GetCVarBool("xpBarText")
+        experienceEnabledSetting,
+        "Shows your session XP per hour and estimated time to level."
     )
 
-showXPBarTextSetting:SetValueChangedCallback(
-    function(_, value)
-        C_CVar.SetCVar(
-            "xpBarText",
-            value and 1 or 0
+
+    local showXPBarTextSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_ExperienceShowXPBarText",
+            "showXPBarText",
+            FL.db.experience,
+            Settings.VarType.Boolean,
+            "Always show XP bar text",
+            C_CVar.GetCVarBool("xpBarText")
         )
-    end
-)
 
-Settings.CreateCheckbox(
-    category,
-    showXPBarTextSetting,
-    "Always displays your current and required XP on the experience bar."
-)
-
-
--- --------------------------------------------------------
--- Merchant
--- --------------------------------------------------------
-
-local autoRepairSetting =
-    Settings.RegisterAddOnSetting(
-        category,
-        "ForeverLite_MerchantAutoRepair",
-        "autoRepair",
-        FL.db.merchant,
-        Settings.VarType.Boolean,
-        "Automatically repair equipment",
-        false
-    )
-
-Settings.CreateCheckbox(
-    category,
-    autoRepairSetting,
-    "Automatically repairs damaged equipment when visiting a repair vendor."
-)
-
-
-local autoSellJunkSetting =
-    Settings.RegisterAddOnSetting(
-        category,
-        "ForeverLite_MerchantAutoSellJunk",
-        "autoSellJunk",
-        FL.db.merchant,
-        Settings.VarType.Boolean,
-        "Automatically sell junk",
-        false
-    )
-
-Settings.CreateCheckbox(
-    category,
-    autoSellJunkSetting,
-    "Automatically sells gray-quality items when visiting a merchant."
-)
-
-
--- --------------------------------------------------------
--- Tooltips
--- --------------------------------------------------------
-
-local colorPlayerClassSetting =
-    Settings.RegisterAddOnSetting(
-        category,
-        "ForeverLite_TooltipsColorPlayerClass",
-        "colorPlayerClass",
-        FL.db.tooltips,
-        Settings.VarType.Boolean,
-        "Color player tooltips",
-        false
-    )
-
-Settings.CreateCheckbox(
-    category,
-    colorPlayerClassSetting,
-    "Colors player names by class and styles guild names."
-)
-
-
--- --------------------------------------------------------
--- Reminders
--- --------------------------------------------------------
-
-local remindersEnabledSetting =
-    Settings.RegisterAddOnSetting(
-        category,
-        "ForeverLite_RemindersEnabled",
-        "enabled",
-        FL.db.reminders,
-        Settings.VarType.Boolean,
-        "Show missing buff reminders",
-        false
-    )
-
-remindersEnabledSetting:SetValueChangedCallback(
-    function(_, value)
-        if FL.Reminders then
-            FL.Reminders:Refresh()
+    showXPBarTextSetting:SetValueChangedCallback(
+        function(_, value)
+            C_CVar.SetCVar(
+                "xpBarText",
+                value and 1 or 0
+            )
         end
-    end
-)
+    )
 
-Settings.CreateCheckbox(
-    category,
-    remindersEnabledSetting,
-    "Shows an icon when an important personal buff is missing."
-)
-
+    Settings.CreateCheckbox(
+        category,
+        showXPBarTextSetting,
+        "Always displays your current and required XP on the experience bar."
+    )
 
 
-Settings.RegisterAddOnCategory(category)
+    -- --------------------------------------------------------
+    -- Vendor
+    -- --------------------------------------------------------
+
+    local autoRepairSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_MerchantAutoRepair",
+            "autoRepair",
+            FL.db.merchant,
+            Settings.VarType.Boolean,
+            "Automatically repair equipment",
+            false
+        )
+
+    Settings.CreateCheckbox(
+        category,
+        autoRepairSetting,
+        "Automatically repairs damaged equipment when visiting a repair vendor."
+    )
+
+
+    local autoSellJunkSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_MerchantAutoSellJunk",
+            "autoSellJunk",
+            FL.db.merchant,
+            Settings.VarType.Boolean,
+            "Automatically sell junk",
+            false
+        )
+
+    Settings.CreateCheckbox(
+        category,
+        autoSellJunkSetting,
+        "Automatically sells gray-quality items when visiting a merchant."
+    )
+
+
+    -- --------------------------------------------------------
+    -- Tooltips
+    -- --------------------------------------------------------
+
+    local colorPlayerClassSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_TooltipsColorPlayerClass",
+            "colorPlayerClass",
+            FL.db.tooltips,
+            Settings.VarType.Boolean,
+            "Color player tooltips",
+            false
+        )
+
+    Settings.CreateCheckbox(
+        category,
+        colorPlayerClassSetting,
+        "Colors player names by class and styles guild names."
+    )
+
+
+    -- --------------------------------------------------------
+    -- Reminders
+    -- --------------------------------------------------------
+
+    local remindersEnabledSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_RemindersEnabled",
+            "enabled",
+            FL.db.reminders,
+            Settings.VarType.Boolean,
+            "Show missing buff reminders",
+            false
+        )
+
+    remindersEnabledSetting:SetValueChangedCallback(
+        function()
+            if FL.Reminders then
+                FL.Reminders:Refresh()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        remindersEnabledSetting,
+        "Shows an icon when an important personal buff is missing."
+    )
+
+
+    Settings.RegisterAddOnCategory(category)
 end
 
 
 function FL:OpenSettings()
     if FL.settingsCategory then
-        Settings.OpenToCategory(FL.settingsCategory:GetID())
+        Settings.OpenToCategory(
+            FL.settingsCategory:GetID()
+        )
     end
 end

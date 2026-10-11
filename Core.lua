@@ -95,14 +95,6 @@ local function InitializeDatabase()
         ForeverLiteDB.reminders.enabled = false
     end
 
-    if ForeverLiteDB.reminders.point == nil then
-        ForeverLiteDB.reminders.point = "CENTER"
-    end
-
-    if ForeverLiteDB.reminders.relativePoint == nil then
-        ForeverLiteDB.reminders.relativePoint = "CENTER"
-    end
-
     if ForeverLiteDB.reminders.x == nil then
         ForeverLiteDB.reminders.x = 0
     end
@@ -119,10 +111,10 @@ end
 -- Slash commands
 -- ------------------------------------------------------------
 
-SLASH_ForeverLite1 = "/fl"
-SLASH_ForeverLite2 = "/ForeverLite"
+SLASH_FOREVERLITE1 = "/fl"
+SLASH_FOREVERLITE2 = "/foreverlite"
 
-SlashCmdList["ForeverLite"] = function(message)
+SlashCmdList["FOREVERLITE"] = function(message)
     message = strtrim(string.lower(message or ""))
 
     if message == "" then
@@ -235,7 +227,7 @@ SlashCmdList["ForeverLite"] = function(message)
                 .. "XP tracker position reset."
             )
         end
-    
+
     elseif message == "reminders unlock" then
         if not FL.db.reminders.enabled then
             print(
@@ -256,7 +248,6 @@ SlashCmdList["ForeverLite"] = function(message)
             )
         end
 
-
     elseif message == "reminders lock" then
         if FL.Reminders then
             FL.Reminders:SetUnlocked(false)
@@ -267,7 +258,6 @@ SlashCmdList["ForeverLite"] = function(message)
             )
         end
 
-
     elseif message == "reminders center" then
         if FL.Reminders then
             FL.Reminders:ResetPosition()
@@ -277,7 +267,6 @@ SlashCmdList["ForeverLite"] = function(message)
                 .. "Buff reminder position reset."
             )
         end
-
 
     else
         print(
@@ -313,5 +302,4 @@ eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
     if FL.Menu then
         FL.Menu:Initialize()
     end
-
 end)
