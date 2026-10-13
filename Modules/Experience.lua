@@ -23,11 +23,11 @@ frame:RegisterForDrag("LeftButton")
 
 -- Temporary position until SavedVariables are loaded.
 frame:SetPoint(
-    "CENTER",
+    "LEFT",
     UIParent,
-    "CENTER",
-    0,
-    160
+    "LEFT",
+    8,
+    -190
 )
 
 frame:Hide()
@@ -108,11 +108,11 @@ local function ApplySavedPosition()
     frame:ClearAllPoints()
 
     frame:SetPoint(
-        db.point or "CENTER",
+        db.point or "LEFT",
         UIParent,
-        db.relativePoint or "CENTER",
-        db.x or 0,
-        db.y or 160
+        db.relativePoint or "LEFT",
+        db.x or 8,
+        db.y or -190
     )
 end
 
@@ -348,10 +348,10 @@ function Experience:ResetPosition()
 
     local db = FL.db.experience
 
-    db.point = "CENTER"
-    db.relativePoint = "CENTER"
-    db.x = 0
-    db.y = 160
+    db.point = "LEFT"
+    db.relativePoint = "LEFT"
+    db.x = 8
+    db.y = -190
 
     ApplySavedPosition()
 end

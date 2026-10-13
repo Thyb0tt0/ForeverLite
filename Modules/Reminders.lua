@@ -59,7 +59,7 @@ frame:SetPoint(
     UIParent,
     "CENTER",
     0,
-    120
+    320
 )
 
 frame:SetClampedToScreen(true)
@@ -132,7 +132,7 @@ local function ApplySavedPosition()
         UIParent,
         "CENTER",
         db.x or 0,
-        db.y or 120
+        db.y or 320
     )
 end
 
@@ -1233,7 +1233,7 @@ function Reminders:ResetPosition()
     local db = FL.db.reminders
 
     db.x = 0
-    db.y = 120
+    db.y = 320
 
     ApplySavedPosition()
 end

@@ -40,19 +40,19 @@ local function InitializeDatabase()
     end
 
     if ForeverLiteDB.experience.point == nil then
-        ForeverLiteDB.experience.point = "CENTER"
+        ForeverLiteDB.experience.point = "LEFT"
     end
 
     if ForeverLiteDB.experience.relativePoint == nil then
-        ForeverLiteDB.experience.relativePoint = "CENTER"
+        ForeverLiteDB.experience.relativePoint = "LEFT"
     end
 
     if ForeverLiteDB.experience.x == nil then
-        ForeverLiteDB.experience.x = 0
+        ForeverLiteDB.experience.x = 8
     end
 
     if ForeverLiteDB.experience.y == nil then
-        ForeverLiteDB.experience.y = 160
+        ForeverLiteDB.experience.y = -190
     end
 
     ForeverLiteDB.merchant = ForeverLiteDB.merchant or {}
@@ -100,7 +100,7 @@ local function InitializeDatabase()
     end
 
     if ForeverLiteDB.reminders.y == nil then
-        ForeverLiteDB.reminders.y = 120
+        ForeverLiteDB.reminders.y = 320
     end
 
     FL.db = ForeverLiteDB
