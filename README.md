@@ -19,6 +19,7 @@ The addon is designed around a simple rule: features should be useful, unobtrusi
 - Session XP per hour
 - Estimated time to level
 - Session duration
+- Automatically hides when no further XP can be gained
 - Option to always show Blizzard's XP bar text
 
 ### Vendor
@@ -38,41 +39,34 @@ Reminders are intentionally simple and only show when a relevant buff, weapon im
 
 ## Commands
 
+Use `/fl help` in-game to show the available commands.
+
 `/fl`  
 Open or close the ForeverLite menu.
 
 `/fl settings`  
 Open ForeverLite in Blizzard's AddOn Settings.
 
-`/fl help`  
-Show available commands.
-
-`/fl health`  
-Toggle nameplate health text.
-
-`/fl xp`  
-Toggle the XP tracker.
-
 `/fl xp reset`  
 Reset the current XP session.
 
 `/fl xp unlock`  
-Unlock the XP tracker for movement.
+Unlock the XP tracker position.
 
 `/fl xp lock`  
-Lock the XP tracker.
+Lock the XP tracker position.
 
-`/fl xp center`  
-Reset the XP tracker position.
+`/fl xp default`  
+Move the XP tracker to its default position.
 
 `/fl reminders unlock`  
-Unlock the reminder display for movement.
+Unlock the buff reminders position.
 
 `/fl reminders lock`  
-Lock the reminder display.
+Lock the buff reminders position.
 
-`/fl reminders center`  
-Reset the reminder display position.
+`/fl reminders default`  
+Move the buff reminders to their default position.
 
 ## Configuration
 
