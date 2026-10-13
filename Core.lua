@@ -127,18 +127,15 @@ SlashCmdList["FOREVERLITE"] = function(message)
 
     elseif message == "help" then
         print("|cff33ff99ForeverLite|r commands:")
-        print("|cffffff00/fl|r - Toggle addon menu")
-        print("|cffffff00/fl help|r - List of all commands")
-        print("|cffffff00/fl settings|r - Open addon settings")
-        print("|cffffff00/fl health|r - Toggle nameplate health")
-        print("|cffffff00/fl xp|r - Toggle XP tracker")
-        print("|cffffff00/fl xp reset|r - Reset XP tracker session")
+        print("|cffffff00/fl|r - Toggle ForeverLite menu")
+        print("|cffffff00/fl settings|r - Open Blizzard AddOn Settings")
+        print("|cffffff00/fl xp reset|r - Reset XP tracker")
         print("|cffffff00/fl xp unlock|r - Unlock XP tracker position")
         print("|cffffff00/fl xp lock|r - Lock XP tracker position")
-        print("|cffffff00/fl xp center|r - Reset XP tracker position")
-        print("|cffffff00/fl reminders unlock|r - Unlock buff reminders")
-        print("|cffffff00/fl reminders lock|r - Lock buff reminders")
-        print("|cffffff00/fl reminders center|r - Reset reminder position")
+        print("|cffffff00/fl xp default|r - Move XP tracker to default position")
+        print("|cffffff00/fl reminders unlock|r - Unlock buff reminders position")
+        print("|cffffff00/fl reminders lock|r - Lock buff reminders position")
+        print("|cffffff00/fl reminders default|r - Move buff reminders to default position")
 
     elseif message == "health" then
         local newValue =
@@ -218,13 +215,14 @@ SlashCmdList["FOREVERLITE"] = function(message)
             )
         end
 
-    elseif message == "xp center" then
+    elseif message == "xp default"
+        or message == "xp center" then
         if FL.Experience then
             FL.Experience:ResetPosition()
 
             print(
                 "|cff33ff99ForeverLite|r: "
-                .. "XP tracker position reset."
+                .. "XP tracker moved to default position."
             )
         end
 
@@ -258,13 +256,14 @@ SlashCmdList["FOREVERLITE"] = function(message)
             )
         end
 
-    elseif message == "reminders center" then
+    elseif message == "reminders default"
+        or message == "reminders center" then
         if FL.Reminders then
             FL.Reminders:ResetPosition()
 
             print(
                 "|cff33ff99ForeverLite|r: "
-                .. "Buff reminder position reset."
+                .. "Buff reminders moved to default position."
             )
         end
 
@@ -302,4 +301,11 @@ eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
     if FL.Menu then
         FL.Menu:Initialize()
     end
+
+    print(
+        "|cff33ff99ForeverLite|r loaded. "
+        .. "Type |cffffff00/fl|r for the menu "
+        .. "or |cffffff00/fl help|r for commands."
+    )
+
 end)
