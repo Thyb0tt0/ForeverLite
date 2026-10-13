@@ -93,6 +93,13 @@ local lastXP = nil
 local updateAccumulator = 0
 local unlocked = false
 
+local function CanTrackExperience()
+    local maxXP = UnitXPMax("player")
+
+    return maxXP
+        and maxXP > 0
+end
+
 
 -- ------------------------------------------------------------
 -- Position
@@ -127,10 +134,10 @@ local function SavePosition()
 
     local db = FL.db.experience
 
-    db.point = point or "CENTER"
-    db.relativePoint = relativePoint or "CENTER"
-    db.x = x or 0
-    db.y = y or 160
+    db.point = point or "LEFT"
+    db.relativePoint = relativePoint or "LEFT"
+    db.x = x or 8
+    db.y = y or -190
 end
 
 
@@ -308,7 +315,8 @@ end
 
 function Experience:Refresh()
     if not FL.db
-        or not FL.db.experience.enabled then
+        or not FL.db.experience.enabled
+        or not CanTrackExperience() then
 
         unlocked = false
         frame:EnableMouse(false)
@@ -329,6 +337,13 @@ end
 
 
 function Experience:SetUnlocked(value)
+    if not CanTrackExperience() then
+        unlocked = false
+        frame:EnableMouse(false)
+        frame:Hide()
+        return
+    end
+
     unlocked = value
 
     frame:EnableMouse(unlocked)
@@ -442,7 +457,12 @@ eventFrame:SetScript(
 
                 if FL.db
                     and FL.db.experience.enabled then
-                    Experience:Reset()
+
+                    if CanTrackExperience() then
+                        Experience:Reset()
+                    else
+                        Experience:Refresh()
+                    end
                 end
             end)
         end

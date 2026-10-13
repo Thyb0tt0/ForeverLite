@@ -803,6 +803,12 @@ end
 
 
 local function AddHunterPetReminder(reminders)
+    -- Pets are temporarily unavailable while using
+    -- a flight path, so do not show a false warning.
+    if UnitOnTaxi("player") then
+        return
+    end
+
     -- Do not remind before the Hunter has unlocked
     -- the normal pet system.
     if not C_SpellBook.IsSpellKnown(
@@ -1299,6 +1305,17 @@ eventFrame:SetScript(
             ApplySavedPosition()
 
             Reminders:Refresh()
+
+
+        elseif event == "PLAYER_CONTROL_LOST"
+            or event == "PLAYER_CONTROL_GAINED" then
+
+            C_Timer.After(
+                0,
+                function()
+                    Reminders:Refresh()
+                end
+            )
 
 
         elseif event == "PLAYER_REGEN_DISABLED" then
