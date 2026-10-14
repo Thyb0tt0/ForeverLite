@@ -33,9 +33,23 @@ The addon is designed around a simple rule: features should be useful, unobtrusi
 
 ### Buff Reminders
 
-Optional missing-buff reminders for supported classes.
+Optional movable reminders for missing class maintenance effects.
 
-Reminders are intentionally simple and only show when a relevant buff, weapon imbue, pet, or similar class maintenance effect is missing.
+Supported reminders include:
+
+- Priest — core self buffs
+- Mage — intellect and armor
+- Druid — Mark of the Wild
+- Hunter — aspects, Trueshot Aura, and pet status
+- Warlock — armor and pet status
+- Rogue — weapon poisons
+- Paladin — auras and long-duration blessings
+- Shaman — weapon imbues and elemental shields
+- Warrior — Battle Shout
+
+Hunter pet reminders distinguish between a missing pet and a dead pet. Warlock pet reminders also account for Demonic Sacrifice.
+
+Reminders are intentionally conservative and avoid effects that are heavily role-, target-, or situation-dependent.
 
 ## Commands
 
