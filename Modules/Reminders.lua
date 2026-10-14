@@ -10,7 +10,7 @@ local Reminders = FL.Reminders
 -- ------------------------------------------------------------
 
 local ICON_SIZE = 48
-local ICON_GAP = 10
+local ICON_GAP = 20
 local DISPLAY_HEIGHT = 70
 -- Keep the reminder strip compact.
 -- Increase or make dynamic if a supported class ever needs more.
