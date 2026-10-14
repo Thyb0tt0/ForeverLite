@@ -863,6 +863,7 @@ end
 -- ------------------------------------------------------------
 
 local HUNTER_CALL_PET_SPELL_ID = 883
+local HUNTER_REVIVE_PET_SPELL_ID = 982
 
 local HUNTER_LONE_WOLF_SPELLS = {
     415370,
@@ -951,12 +952,36 @@ local function AddHunterPetReminder(reminders)
         return
     end
 
-    -- A living active pet means everything is fine.
-    if UnitExists("pet")
-        and not UnitIsDeadOrGhost("pet") then
+    -- Distinguish between an absent pet and a dead pet
+    -- so the reminder points to the correct action.
+    if UnitExists("pet") then
+        if not UnitIsDeadOrGhost("pet") then
+            return
+        end
+
+        local icon =
+            C_Spell.GetSpellTexture(
+                HUNTER_REVIVE_PET_SPELL_ID
+            )
+            or C_Spell.GetSpellTexture(
+                HUNTER_CALL_PET_SPELL_ID
+            )
+
+        if not icon then
+            return
+        end
+
+        table.insert(
+            reminders,
+            {
+                icon = icon,
+                label = "PET DEAD",
+            }
+        )
 
         return
     end
+
 
     local icon =
         C_Spell.GetSpellTexture(
@@ -1050,7 +1075,7 @@ local function GetMissingReminders()
                 6117,   -- Mage Armor
                 428741, -- Molten Armor
             },
-            "BUFF!"
+            "NO ARMOR"
         )
 
 
@@ -1208,7 +1233,7 @@ local function GetMissingReminders()
                 25895, -- Greater Salvation
                 25890, -- Greater Light
             },
-            "BUFF!"
+            "NO BLESSING"
         )
 
     elseif class == "SHAMAN" then
@@ -1238,7 +1263,7 @@ local function GetMissingReminders()
                 408510, -- Water Shield
                 408514, -- Earth Shield
             },
-            "BUFF!"
+            "NO SHIELD"
         )
 
     elseif class == "WARRIOR" then
