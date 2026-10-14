@@ -12,9 +12,16 @@ local Reminders = FL.Reminders
 local ICON_SIZE = 48
 local ICON_GAP = 10
 local DISPLAY_HEIGHT = 70
+-- Keep the reminder strip compact.
+-- Increase or make dynamic if a supported class ever needs more.
 local MAX_REMINDERS = 3
 
 local unlocked = false
+
+local PET_REMINDER_GRACE_SECONDS = 2
+
+local petReminderGraceUntil = 0
+local petReminderTimerToken = 0
 
 local battleShoutExpiresAt = 0
 local battleShoutTimerToken = 0
@@ -659,7 +666,7 @@ local function AddRogueReminder(reminders)
         reminders,
         {
             icon = icon,
-            label = "POISON!",
+            label = "NO POISON",
         }
     )
 end
@@ -731,7 +738,122 @@ local function AddShamanWeaponReminder(reminders)
         reminders,
         {
             icon = icon,
-            label = "IMBUE!",
+            label = "NO IMBUE",
+        }
+    )
+end
+
+-- ------------------------------------------------------------
+-- Pet reminder helpers
+-- ------------------------------------------------------------
+
+local function IsPetReminderSuppressed()
+    if UnitOnTaxi("player") then
+        return true
+    end
+
+    return GetTime() < petReminderGraceUntil
+end
+
+
+local function StartPetReminderGrace()
+    petReminderTimerToken =
+        petReminderTimerToken + 1
+
+    local timerToken =
+        petReminderTimerToken
+
+    petReminderGraceUntil =
+        GetTime() + PET_REMINDER_GRACE_SECONDS
+
+    -- Hide any stale pet warning immediately.
+    Reminders:Refresh()
+
+    -- Check again after WoW has had time to restore
+    -- pets that were temporarily hidden by a flight path.
+    C_Timer.After(
+        PET_REMINDER_GRACE_SECONDS,
+        function()
+            if timerToken
+                ~= petReminderTimerToken then
+
+                return
+            end
+
+            Reminders:Refresh()
+        end
+    )
+end
+
+-- ------------------------------------------------------------
+-- Warlock pet
+-- ------------------------------------------------------------
+
+local WARLOCK_SUMMON_IMP_SPELL_ID = 688
+local WARLOCK_DEMONIC_SACRIFICE_SPELL_ID = 18788
+
+local WARLOCK_DEMONIC_SACRIFICE_AURAS = {
+    18789, -- Burning Shadow
+    18790, -- Fel Stamina
+    18791, -- Touch of Fire
+    18792, -- Fel Energy
+}
+
+local WARLOCK_DEMONIC_SACRIFICE_CACHE_KEY =
+    GetAuraCacheKey(
+        WARLOCK_DEMONIC_SACRIFICE_AURAS
+    )
+
+
+local function HasDemonicSacrifice()
+    return HasAnyAura(
+        WARLOCK_DEMONIC_SACRIFICE_AURAS,
+        WARLOCK_DEMONIC_SACRIFICE_CACHE_KEY
+    )
+end
+
+
+local function AddWarlockPetReminder(reminders)
+    -- Summon Imp is available from level 1 and is our
+    -- baseline indication that the normal demon system
+    -- is available.
+    if not C_SpellBook.IsSpellKnown(
+        WARLOCK_SUMMON_IMP_SPELL_ID
+    ) then
+        return
+    end
+
+    if IsPetReminderSuppressed() then
+        return
+    end
+
+    -- A living active demon means everything is fine.
+    if UnitExists("pet")
+        and not UnitIsDeadOrGhost("pet") then
+
+        return
+    end
+
+    -- Demonic Sacrifice intentionally plays without
+    -- the sacrificed demon.
+    if HasDemonicSacrifice() then
+        return
+    end
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            WARLOCK_SUMMON_IMP_SPELL_ID
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "NO PET",
         }
     )
 end
@@ -794,6 +916,13 @@ local HUNTER_ASPECT_AURAS = {
     415423, -- Viper
 }
 
+local HUNTER_TRUESHOT_SPELLS = {
+    20906,   -- Rank 5
+    20905,   -- Rank 4
+    19506,   -- Rank 3
+    1299348, -- Rank 2
+    1299346, -- Rank 1
+}
 
 local function HasLoneWolf()
     return GetKnownSpell(
@@ -803,9 +932,9 @@ end
 
 
 local function AddHunterPetReminder(reminders)
-    -- Pets are temporarily unavailable while using
-    -- a flight path, so do not show a false warning.
-    if UnitOnTaxi("player") then
+    -- Do not warn while pets are temporarily unavailable
+    -- or being restored after a flight path.
+    if IsPetReminderSuppressed() then
         return
     end
 
@@ -842,7 +971,7 @@ local function AddHunterPetReminder(reminders)
         reminders,
         {
             icon = icon,
-            label = "PET!",
+            label = "NO PET",
         }
     )
 end
@@ -877,6 +1006,24 @@ local function GetMissingReminders()
             "BUFF!"
         )
 
+        -- Divine Spirit.
+        -- Prayer of Spirit also satisfies this reminder.
+        AddSpellReminder(
+            reminders,
+            {
+                27841, -- Rank 4
+                14819, -- Rank 3
+                14818, -- Rank 2
+                14752, -- Rank 1
+                27681, -- Prayer of Spirit
+            },
+            {
+                14752, -- Divine Spirit
+                27681, -- Prayer of Spirit
+            },
+            "BUFF!"
+        )
+
 
     elseif class == "MAGE" then
 
@@ -898,9 +1045,10 @@ local function GetMissingReminders()
                 168,
             },
             {
-                168,
-                7302,
-                6117,
+                168,    -- Frost Armor
+                7302,   -- Ice Armor
+                6117,   -- Mage Armor
+                428741, -- Molten Armor
             },
             "BUFF!"
         )
@@ -936,7 +1084,16 @@ local function GetMissingReminders()
             reminders,
             HUNTER_ASPECT_KNOWN_SPELLS,
             HUNTER_ASPECT_AURAS,
-            "ASPECT!"
+            "NO ASPECT"
+        )
+
+
+        -- Keep Trueshot Aura active when the talent is known.
+        AddSpellReminder(
+            reminders,
+            HUNTER_TRUESHOT_SPELLS,
+            HUNTER_TRUESHOT_SPELLS,
+            "NO TRUESHOT"
         )
 
 
@@ -969,6 +1126,9 @@ local function GetMissingReminders()
             "BUFF!"
         )
 
+        AddWarlockPetReminder(
+            reminders
+        )
 
     elseif class == "ROGUE" then
 
@@ -999,7 +1159,7 @@ local function GetMissingReminders()
                 19888, -- Frost Resistance Aura
                 19891, -- Fire Resistance Aura
             },
-            "BUFF!"
+            "NO AURA"
         )
 
         -- Any normal long-duration Blessing satisfies this reminder.
@@ -1258,6 +1418,14 @@ eventFrame:RegisterEvent(
 )
 
 eventFrame:RegisterEvent(
+    "PLAYER_CONTROL_LOST"
+)
+
+eventFrame:RegisterEvent(
+    "PLAYER_CONTROL_GAINED"
+)
+
+eventFrame:RegisterEvent(
     "SPELLS_CHANGED"
 )
 
@@ -1307,15 +1475,22 @@ eventFrame:SetScript(
             Reminders:Refresh()
 
 
-        elseif event == "PLAYER_CONTROL_LOST"
-            or event == "PLAYER_CONTROL_GAINED" then
+        elseif event == "PLAYER_CONTROL_LOST" then
+            -- Cancel any pending post-flight refresh.
+            petReminderTimerToken =
+                petReminderTimerToken + 1
 
+            -- Let the taxi state settle before checking it.
             C_Timer.After(
                 0,
                 function()
                     Reminders:Refresh()
                 end
             )
+
+
+        elseif event == "PLAYER_CONTROL_GAINED" then
+            StartPetReminderGrace()
 
 
         elseif event == "PLAYER_REGEN_DISABLED" then
@@ -1338,6 +1513,15 @@ eventFrame:SetScript(
             if unit == "player" then
                 local shouldRefresh = false
 
+                if spellID
+                    == WARLOCK_DEMONIC_SACRIFICE_SPELL_ID then
+
+                    auraStateCache[
+                        WARLOCK_DEMONIC_SACRIFICE_CACHE_KEY
+                    ] = true
+
+                    shouldRefresh = true
+                end
 
                 if BATTLE_SHOUT_LOOKUP[spellID] then
                     battleShoutExpiresAt =
