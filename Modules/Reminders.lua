@@ -1191,9 +1191,6 @@ local function GetMissingReminders()
         --
         -- Short situational Blessings such as Protection,
         -- Freedom, and Sacrifice deliberately do not count.
-        --
-        -- Salvation is no longer a Blessing in WoW Forever
-        -- and therefore does not satisfy this reminder.
         AddSpellReminder(
             reminders,
             {
@@ -1214,24 +1211,19 @@ local function GetMissingReminders()
                 19850,
                 19742,
 
-                -- Other long-duration Blessings
+                -- Blessing of Kings
                 20217, -- Kings
-                19979, -- Light Rank 3
-                19978, -- Light Rank 2
-                19977, -- Light Rank 1
             },
             {
                 -- Normal Blessings
                 19740, -- Might
                 19742, -- Wisdom
                 20217, -- Kings
-                19977, -- Light
 
                 -- Greater Blessings
                 25782, -- Greater Might
                 25894, -- Greater Wisdom
                 25898, -- Greater Kings
-                25890, -- Greater Light
             },
             "NO BLESSING"
         )
