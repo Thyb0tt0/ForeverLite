@@ -1027,13 +1027,26 @@ local function TooltipTextContainsXPBonus(text)
 end
 
 
+
 local function IsXPFoodItem(
     bag,
     slot,
     itemID
 )
+    -- Only consumable items can qualify as XP food.
+    -- This excludes recipes and other non-consumables.
+    local _, _, _, _, _, itemClassID =
+        C_Item.GetItemInfoInstant(
+            itemID
+        )
+
+    if itemClassID ~= Enum.ItemClass.Consumable then
+        return false
+    end
+
     local cached =
         xpFoodItemCache[itemID]
+
 
     if cached ~= nil then
         return cached
