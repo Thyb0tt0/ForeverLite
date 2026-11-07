@@ -308,6 +308,32 @@ function FL:InitializeSettings()
     )
 
 
+    local xpFoodReminderSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_XPFoodReminderEnabled",
+            "xpFoodEnabled",
+            FL.db.reminders,
+            Settings.VarType.Boolean,
+            "Show missing XP food reminder",
+            false
+        )
+
+    xpFoodReminderSetting:SetValueChangedCallback(
+        function()
+            if FL.Reminders then
+                FL.Reminders:RefreshXPFoodState()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        xpFoodReminderSetting,
+        "Shows a reminder out of combat when you have +5% kill-XP food in your bags but are not Well Fed."
+    )
+
+
     Settings.RegisterAddOnCategory(category)
 end
 

@@ -3,11 +3,21 @@ local addonName, FL = ...
 FL.name = addonName
 
 
+local currentVersion =
+    C_AddOns.GetAddOnMetadata(
+        addonName,
+        "Version"
+    ) or "unknown"
+
+
 -- ------------------------------------------------------------
 -- Database
 -- ------------------------------------------------------------
 
 local function InitializeDatabase()
+    local hadDatabaseBeforeInitialization =
+        ForeverLiteDB ~= nil
+
     ForeverLiteDB = ForeverLiteDB or {}
 
     ForeverLiteDB.nameplates = ForeverLiteDB.nameplates or {}
@@ -95,6 +105,10 @@ local function InitializeDatabase()
         ForeverLiteDB.reminders.enabled = false
     end
 
+    if ForeverLiteDB.reminders.xpFoodEnabled == nil then
+        ForeverLiteDB.reminders.xpFoodEnabled = false
+    end
+
     if ForeverLiteDB.reminders.x == nil then
         ForeverLiteDB.reminders.x = 0
     end
@@ -102,6 +116,33 @@ local function InitializeDatabase()
     if ForeverLiteDB.reminders.y == nil then
         ForeverLiteDB.reminders.y = 320
     end
+
+    local previousVersion =
+        ForeverLiteDB.lastSeenVersion
+
+
+    local isTrackedUpdate =
+        previousVersion ~= nil
+        and previousVersion ~= currentVersion
+
+
+    local isExistingInstallBeforeVersionTracking =
+        previousVersion == nil
+        and hadDatabaseBeforeInitialization
+
+
+    FL.showUpdateNotice =
+        isTrackedUpdate
+        or isExistingInstallBeforeVersionTracking
+
+
+    FL.showXPFoodUpdateNotice =
+        FL.showUpdateNotice
+        and currentVersion == "0.3.0"
+
+
+    ForeverLiteDB.lastSeenVersion =
+        currentVersion
 
     FL.db = ForeverLiteDB
 end
@@ -227,10 +268,12 @@ SlashCmdList["FOREVERLITE"] = function(message)
         end
 
     elseif message == "reminders unlock" then
-        if not FL.db.reminders.enabled then
+        if not FL.db.reminders.enabled
+            and not FL.db.reminders.xpFoodEnabled then
+
             print(
                 "|cff33ff99ForeverLite|r: "
-                .. "Enable buff reminders before unlocking them."
+                .. "Enable a reminder option before unlocking them."
             )
 
             return
@@ -279,33 +322,59 @@ end
 -- Addon initialization
 -- ------------------------------------------------------------
 
+
 local eventFrame = CreateFrame("Frame")
 
 eventFrame:RegisterEvent("ADDON_LOADED")
+eventFrame:RegisterEvent("PLAYER_LOGIN")
 
 eventFrame:SetScript("OnEvent", function(self, event, loadedAddon)
-    if loadedAddon ~= addonName then
-        return
+    if event == "ADDON_LOADED" then
+        if loadedAddon ~= addonName then
+            return
+        end
+
+        InitializeDatabase()
+
+        if FL.Nameplates then
+            FL.Nameplates:ApplySelectedScale()
+        end
+
+        if FL.InitializeSettings then
+            FL:InitializeSettings()
+        end
+
+        if FL.Menu then
+            FL.Menu:Initialize()
+        end
+
+        self:UnregisterEvent("ADDON_LOADED")
+
+    elseif event == "PLAYER_LOGIN" then
+        print(
+            "|cff33ff99ForeverLite|r v"
+            .. currentVersion
+            .. " loaded. Type |cffffff00/fl|r for the menu "
+            .. "or |cffffff00/fl help|r for commands."
+        )
+
+        if FL.showUpdateNotice then
+            if FL.showXPFoodUpdateNotice then
+                print(
+                    "|cff33ff99ForeverLite|r updated to v"
+                    .. currentVersion
+                    .. ": New optional XP food reminder available. "
+                    .. "Type |cffffff00/fl|r to enable it."
+                )
+            else
+                print(
+                    "|cff33ff99ForeverLite|r updated to v"
+                    .. currentVersion
+                    .. ". Type |cffffff00/fl|r to see available options."
+                )
+            end
+        end
+
+        self:UnregisterEvent("PLAYER_LOGIN")
     end
-
-    InitializeDatabase()
-
-    if FL.Nameplates then
-        FL.Nameplates:ApplySelectedScale()
-    end
-
-    if FL.InitializeSettings then
-        FL:InitializeSettings()
-    end
-
-    if FL.Menu then
-        FL.Menu:Initialize()
-    end
-
-    print(
-        "|cff33ff99ForeverLite|r loaded. "
-        .. "Type |cffffff00/fl|r for the menu "
-        .. "or |cffffff00/fl help|r for commands."
-    )
-
 end)

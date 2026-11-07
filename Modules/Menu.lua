@@ -702,6 +702,18 @@ local remindersCheckbox =
         end
     )
 
+
+local xpFoodReminderCheckbox =
+    AddCheckboxRow(
+        "Show missing XP food reminder",
+        function(value)
+            SetSetting(
+                "ForeverLite_XPFoodReminderEnabled",
+                value
+            )
+        end
+    )
+
 -- ------------------------------------------------------------
 -- Dynamic frame height
 -- ------------------------------------------------------------
@@ -850,6 +862,10 @@ function Menu:Refresh()
 
     remindersCheckbox:SetChecked(
         FL.db.reminders.enabled
+    )
+
+    xpFoodReminderCheckbox:SetChecked(
+        FL.db.reminders.xpFoodEnabled
     )
 
     healthFormatDropdown:GenerateMenu()

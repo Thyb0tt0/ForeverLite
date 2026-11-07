@@ -12,9 +12,9 @@ local Reminders = FL.Reminders
 local ICON_SIZE = 48
 local ICON_GAP = 20
 local DISPLAY_HEIGHT = 70
--- Keep the reminder strip compact.
--- Increase or make dynamic if a supported class ever needs more.
-local MAX_REMINDERS = 3
+-- Keep the reminder strip compact while allowing the current
+-- maximum of three class reminders plus XP food.
+local MAX_REMINDERS = 4
 
 local unlocked = false
 
@@ -29,6 +29,14 @@ local battleShoutTimerToken = 0
 local auraStateCache = {}
 local auraNameToCacheKey = {}
 
+local hasXPFood = false
+local xpFoodItemCache = {}
+
+local XP_FOOD_TOOLTIP_TEXT =
+    "experience gained from kills is increased by 5%"
+
+local WELL_FED_AURA_NAME = "Well Fed"
+local WELL_FED_ICON_SPELL_ID = 1248422
 
 local BATTLE_SHOUT_SPELLS = {
     25289, -- Rank 7
@@ -1002,6 +1010,165 @@ local function AddHunterPetReminder(reminders)
 end
 
 -- ------------------------------------------------------------
+-- XP food
+-- ------------------------------------------------------------
+
+local function TooltipTextContainsXPBonus(text)
+    if not text then
+        return false
+    end
+
+    return string.find(
+        string.lower(text),
+        XP_FOOD_TOOLTIP_TEXT,
+        1,
+        true
+    ) ~= nil
+end
+
+
+local function IsXPFoodItem(
+    bag,
+    slot,
+    itemID
+)
+    local cached =
+        xpFoodItemCache[itemID]
+
+    if cached ~= nil then
+        return cached
+    end
+
+    local tooltip =
+        C_TooltipInfo.GetBagItem(
+            bag,
+            slot
+        )
+
+    if not tooltip
+        or not tooltip.lines then
+
+        return false
+    end
+
+    for _, line in ipairs(tooltip.lines) do
+        if TooltipTextContainsXPBonus(
+            line.leftText
+        )
+            or TooltipTextContainsXPBonus(
+                line.rightText
+            ) then
+
+            xpFoodItemCache[itemID] = true
+            return true
+        end
+    end
+
+    xpFoodItemCache[itemID] = false
+    return false
+end
+
+
+local function UpdateXPFoodBagState()
+    hasXPFood = false
+
+    if not FL.db
+        or not FL.db.reminders.xpFoodEnabled then
+
+        return
+    end
+
+    for bag = 0, 4 do
+        local numSlots =
+            C_Container.GetContainerNumSlots(
+                bag
+            )
+
+        for slot = 1, numSlots do
+            local itemID =
+                C_Container.GetContainerItemID(
+                    bag,
+                    slot
+                )
+
+            if itemID
+                and IsXPFoodItem(
+                    bag,
+                    slot,
+                    itemID
+                ) then
+
+                hasXPFood = true
+                return
+            end
+        end
+    end
+end
+
+
+local function AddXPFoodReminder(reminders)
+    if not FL.db.reminders.xpFoodEnabled then
+        return
+    end
+
+    -- Eating is not actionable during combat or
+    -- while travelling on a flight path.
+    if UnitAffectingCombat("player")
+        or UnitOnTaxi("player") then
+
+        return
+    end
+
+    -- Stop reminding once the character can no
+    -- longer gain experience.
+    local maxXP =
+        UnitXPMax("player")
+
+    if not maxXP
+        or maxXP <= 0 then
+
+        return
+    end
+
+    -- Do not nag the player when they have no
+    -- qualifying XP food available.
+    if not hasXPFood then
+        return
+    end
+
+    -- The hidden XP aura cannot be queried directly,
+    -- but nutritious XP food also applies a visible
+    -- aura named Well Fed.
+    local wellFed =
+        C_UnitAuras.GetAuraDataBySpellName(
+            "player",
+            WELL_FED_AURA_NAME,
+            "HELPFUL"
+        )
+
+    if wellFed then
+        return
+    end
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            WELL_FED_ICON_SPELL_ID
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "XP FOOD",
+        }
+    )
+end
+
+-- ------------------------------------------------------------
 -- Class reminders
 -- ------------------------------------------------------------
 
@@ -1010,6 +1177,17 @@ local function GetMissingReminders()
 
     local _, class =
         UnitClass("player")
+
+
+    -- XP food is a separate opt-in feature and can work
+    -- even when class buff reminders are disabled.
+    if not FL.db.reminders.enabled then
+        AddXPFoodReminder(
+            reminders
+        )
+
+        return reminders
+    end
 
 
     if class == "PRIEST" then
@@ -1277,6 +1455,10 @@ local function GetMissingReminders()
     end
 
 
+    AddXPFoodReminder(
+        reminders
+    )
+
     return reminders
 end
 
@@ -1363,7 +1545,10 @@ end
 
 function Reminders:Refresh()
     if not FL.db
-        or not FL.db.reminders.enabled then
+        or (
+            not FL.db.reminders.enabled
+            and not FL.db.reminders.xpFoodEnabled
+        ) then
 
         frame:Hide()
         return
@@ -1407,6 +1592,10 @@ function Reminders:SetUnlocked(value)
     end
 end
 
+function Reminders:RefreshXPFoodState()
+    UpdateXPFoodBagState()
+    self:Refresh()
+end
 
 function Reminders:ResetPosition()
     if not FL.db then
@@ -1455,6 +1644,14 @@ eventFrame:RegisterEvent(
 )
 
 eventFrame:RegisterEvent(
+    "PLAYER_LEVEL_UP"
+)
+
+eventFrame:RegisterEvent(
+    "BAG_UPDATE_DELAYED"
+)
+
+eventFrame:RegisterEvent(
     "UNIT_INVENTORY_CHANGED"
 )
 
@@ -1488,8 +1685,23 @@ eventFrame:SetScript(
     function(_, event, ...)
         if event == "PLAYER_ENTERING_WORLD" then
             ApplySavedPosition()
+            UpdateXPFoodBagState()
 
             Reminders:Refresh()
+
+
+        elseif event == "BAG_UPDATE_DELAYED" then
+            UpdateXPFoodBagState()
+            Reminders:Refresh()
+
+
+        elseif event == "PLAYER_LEVEL_UP" then
+            C_Timer.After(
+                0,
+                function()
+                    Reminders:Refresh()
+                end
+            )
 
 
         elseif event == "PLAYER_CONTROL_LOST" then
