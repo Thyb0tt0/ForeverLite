@@ -12,9 +12,9 @@ local Reminders = FL.Reminders
 local ICON_SIZE = 48
 local ICON_GAP = 20
 local DISPLAY_HEIGHT = 70
--- Keep the reminder strip compact while allowing the current
--- maximum of three class reminders plus XP food.
-local MAX_REMINDERS = 4
+-- Allow class reminders, XP food, two weapon stones,
+-- and gathering tracking to appear together.
+local MAX_REMINDERS = 8
 
 local unlocked = false
 
@@ -32,11 +32,58 @@ local auraNameToCacheKey = {}
 local hasXPFood = false
 local xpFoodItemCache = {}
 
+local pendingXPFoodTooltips = {}
+
+local availableStoneIcons = {}
+
+-- Standard sharpening stones and weightstones.
+-- Elemental Sharpening Stone works on melee weapons.
+local WEAPON_STONE_TYPES = {
+    -- Sharpening stones
+    [2862] = "sharp",    -- Rough
+    [287978] = "sharp",  -- Rough (Forever variant)
+    [2863] = "sharp",    -- Coarse
+    [2871] = "sharp",    -- Heavy
+    [7964] = "sharp",    -- Solid
+    [12404] = "sharp",   -- Dense
+    [18262] = "any",     -- Elemental (original)
+    [287980] = "any",    -- Elemental (Forever)
+
+    -- Weightstones
+    [3239] = "blunt",    -- Rough
+    [3240] = "blunt",    -- Coarse
+    [3241] = "blunt",    -- Heavy
+    [7965] = "blunt",    -- Solid
+    [12643] = "blunt",   -- Dense
+}
+
+local SHARP_WEAPON_SUBCLASSES = {
+    [0] = true,  -- One-handed axes
+    [1] = true,  -- Two-handed axes
+    [6] = true,  -- Polearms
+    [7] = true,  -- One-handed swords
+    [8] = true,  -- Two-handed swords
+    [15] = true, -- Daggers
+}
+
+local BLUNT_WEAPON_SUBCLASSES = {
+    [4] = true,  -- One-handed maces
+    [5] = true,  -- Two-handed maces
+    [10] = true, -- Staves
+}
+
+local FIND_HERBS_SPELL_ID = 2383
+local FIND_MINERALS_SPELL_ID = 2580
+
+
 local XP_FOOD_TOOLTIP_TEXT =
     "experience gained from kills is increased by 5%"
 
 local WELL_FED_AURA_NAME = "Well Fed"
 local WELL_FED_ICON_SPELL_ID = 1248422
+
+local SLEEPING_BAG_ITEM_ID = 211527
+local WELL_RESTED_SPELL_ID = 429959
 
 local BATTLE_SHOUT_SPELLS = {
     25289, -- Rank 7
@@ -1044,12 +1091,8 @@ local function IsXPFoodItem(
         return false
     end
 
-    local cached =
-        xpFoodItemCache[itemID]
-
-
-    if cached ~= nil then
-        return cached
+    if xpFoodItemCache[itemID] then
+        return true
     end
 
     local tooltip =
@@ -1057,6 +1100,14 @@ local function IsXPFoodItem(
             bag,
             slot
         )
+
+    -- Remember tooltip instances that may still
+    -- receive asynchronous data updates.
+    if tooltip and tooltip.dataInstanceID then
+        pendingXPFoodTooltips[
+            tooltip.dataInstanceID
+        ] = true
+    end
 
     if not tooltip
         or not tooltip.lines then
@@ -1077,13 +1128,13 @@ local function IsXPFoodItem(
         end
     end
 
-    xpFoodItemCache[itemID] = false
     return false
 end
 
 
 local function UpdateXPFoodBagState()
     hasXPFood = false
+    wipe(pendingXPFoodTooltips)
 
     if not FL.db
         or not FL.db.reminders.xpFoodEnabled then
@@ -1112,12 +1163,62 @@ local function UpdateXPFoodBagState()
                 ) then
 
                 hasXPFood = true
+                wipe(pendingXPFoodTooltips)
                 return
             end
         end
     end
 end
 
+
+-- ------------------------------------------------------------
+-- Weapon stone inventory
+-- ------------------------------------------------------------
+
+local function UpdateWeaponStoneBagState()
+    availableStoneIcons = {}
+
+    if not FL.db
+        or not FL.db.reminders.weaponStoneEnabled then
+        return
+    end
+
+    for bag = 0, 4 do
+        local numSlots =
+            C_Container.GetContainerNumSlots(
+                bag
+            )
+
+        for slot = 1, numSlots do
+            local itemID =
+                C_Container.GetContainerItemID(
+                    bag,
+                    slot
+                )
+
+            local stoneType =
+                itemID and WEAPON_STONE_TYPES[itemID]
+
+            if stoneType
+                and not availableStoneIcons[stoneType] then
+
+                local _, _, _, _, requiredLevel =
+                    C_Item.GetItemInfo(itemID)
+
+                if not requiredLevel
+                    or UnitLevel("player") >= requiredLevel then
+
+                    local _, _, _, _, icon =
+                        C_Item.GetItemInfoInstant(itemID)
+
+                    if icon then
+                        availableStoneIcons[stoneType] = icon
+                    end
+                end
+            end
+        end
+    end
+end
 
 local function AddXPFoodReminder(reminders)
     if not FL.db.reminders.xpFoodEnabled then
@@ -1146,6 +1247,12 @@ local function AddXPFoodReminder(reminders)
     -- Do not nag the player when they have no
     -- qualifying XP food available.
     if not hasXPFood then
+        return
+    end
+
+    -- Do not mistake restricted aura information
+    -- for a missing buff.
+    if C_Secrets.ShouldAurasBeSecret() then
         return
     end
 
@@ -1181,6 +1288,284 @@ local function AddXPFoodReminder(reminders)
     )
 end
 
+
+-- ------------------------------------------------------------
+-- Weapon stone reminders
+-- ------------------------------------------------------------
+
+local function GetMissingWeaponStoneIcon(
+    inventorySlot,
+    weaponSlot
+)
+    local itemID =
+        GetInventoryItemID(
+            "player",
+            inventorySlot
+        )
+
+    if not itemID then
+        return nil
+    end
+
+    local _, _, _, _, _, classID, subClassID =
+        C_Item.GetItemInfoInstant(
+            itemID
+        )
+
+    if classID ~= Enum.ItemClass.Weapon then
+        return nil
+    end
+
+    local stoneType
+
+    if SHARP_WEAPON_SUBCLASSES[subClassID] then
+        stoneType = "sharp"
+    elseif BLUNT_WEAPON_SUBCLASSES[subClassID] then
+        stoneType = "blunt"
+    else
+        return nil
+    end
+
+    local icon =
+        availableStoneIcons[stoneType]
+        or availableStoneIcons.any
+
+    if not icon then
+        return nil
+    end
+
+    local enchants =
+        C_Item.GetWeaponEnchantInfo(
+            weaponSlot
+        ) or {}
+
+    for _, enchant in ipairs(enchants) do
+        if enchant.hasEnchant
+            and enchant.enchantType
+                == Enum.ItemEnchantType.Temporary then
+
+            return nil
+        end
+    end
+
+    return icon
+end
+
+
+local function AddWeaponStoneReminders(reminders)
+    if not FL.db.reminders.weaponStoneEnabled then
+        return
+    end
+
+    if UnitAffectingCombat("player")
+        or UnitOnTaxi("player") then
+        return
+    end
+
+    local mainHandIcon =
+        GetMissingWeaponStoneIcon(
+            16,
+            Enum.WeaponSlot.MainHand
+        )
+
+    if mainHandIcon then
+        table.insert(
+            reminders,
+            {
+                icon = mainHandIcon,
+                label = "MH STONE",
+            }
+        )
+    end
+
+    local offHandIcon =
+        GetMissingWeaponStoneIcon(
+            17,
+            Enum.WeaponSlot.OffHand
+        )
+
+    if offHandIcon then
+        table.insert(
+            reminders,
+            {
+                icon = offHandIcon,
+                label = "OH STONE",
+            }
+        )
+    end
+end
+
+
+-- ------------------------------------------------------------
+-- Gathering tracking reminder
+-- ------------------------------------------------------------
+
+local function AddGatheringTrackingReminder(reminders)
+    if not FL.db.reminders.gatheringTrackingEnabled then
+        return
+    end
+
+    if UnitAffectingCombat("player")
+        or UnitOnTaxi("player") then
+        return
+    end
+
+    local knowsHerbs =
+        C_SpellBook.IsSpellKnown(
+            FIND_HERBS_SPELL_ID
+        )
+
+    local knowsMinerals =
+        C_SpellBook.IsSpellKnown(
+            FIND_MINERALS_SPELL_ID
+        )
+
+    if not knowsHerbs
+        and not knowsMinerals then
+        return
+    end
+
+    local count =
+        C_Minimap.GetNumTrackingTypes() or 0
+
+    for index = 1, count do
+        local info =
+            C_Minimap.GetTrackingInfo(
+                index
+            )
+
+        if info
+            and info.active
+            and (
+                info.spellID == FIND_HERBS_SPELL_ID
+                or info.spellID == FIND_MINERALS_SPELL_ID
+            ) then
+            return
+        end
+    end
+
+    local spellID =
+        knowsMinerals
+        and FIND_MINERALS_SPELL_ID
+        or FIND_HERBS_SPELL_ID
+
+    local icon =
+        C_Spell.GetSpellTexture(
+            spellID
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "TRACK!",
+        }
+    )
+end
+
+-- ------------------------------------------------------------
+-- Sleeping Bag
+-- ------------------------------------------------------------
+
+local function HasSleepingBag()
+    for bag = 0, 4 do
+        local numSlots =
+            C_Container.GetContainerNumSlots(bag)
+
+        for slot = 1, numSlots do
+            local itemID =
+                C_Container.GetContainerItemID(
+                    bag,
+                    slot
+                )
+
+            if itemID == SLEEPING_BAG_ITEM_ID then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function AddSleepingBagReminder(reminders)
+    if not FL.db.reminders.sleepingBagEnabled then
+        return
+    end
+    
+    -- Hide during combat or while flying.
+    if UnitAffectingCombat("player")
+        or UnitOnTaxi("player") then
+        return
+    end
+
+    -- Only relevant while leveling.
+    if UnitLevel("player") >= 60 then
+        return
+    end
+
+    local maxXP = UnitXPMax("player")
+
+    if not maxXP or maxXP <= 0 then
+        return
+    end
+
+    if not HasSleepingBag() then
+        return
+    end
+    
+    -- Only trust aura information when readable.
+    if C_Secrets.ShouldAurasBeSecret() then
+        return
+    end
+
+    -- Check the exact Well-Rested buff.
+    local aura =
+        C_UnitAuras.GetPlayerAuraBySpellID(
+            WELL_RESTED_SPELL_ID
+        )
+
+    if aura then
+        local stacks = aura.applications
+
+        -- Avoid using restricted aura data.
+        if issecretvalue
+            and issecretvalue(stacks) then
+            return
+        end
+
+        if type(stacks) ~= "number" then
+            return
+        end
+
+        -- Only 3 stacks satisfy the reminder.
+        if stacks >= 3 then
+            return
+        end
+    end
+
+    local _, _, _, _, icon =
+        C_Item.GetItemInfoInstant(
+            SLEEPING_BAG_ITEM_ID
+        )
+
+    if not icon then
+        return
+    end
+
+    table.insert(
+        reminders,
+        {
+            icon = icon,
+            label = "REST!",
+        }
+    )
+end
+
 -- ------------------------------------------------------------
 -- Class reminders
 -- ------------------------------------------------------------
@@ -1195,9 +1580,10 @@ local function GetMissingReminders()
     -- XP food is a separate opt-in feature and can work
     -- even when class buff reminders are disabled.
     if not FL.db.reminders.enabled then
-        AddXPFoodReminder(
-            reminders
-        )
+        AddXPFoodReminder(reminders)
+        AddWeaponStoneReminders(reminders)
+        AddGatheringTrackingReminder(reminders)
+        AddSleepingBagReminder(reminders)
 
         return reminders
     end
@@ -1468,9 +1854,10 @@ local function GetMissingReminders()
     end
 
 
-    AddXPFoodReminder(
-        reminders
-    )
+    AddXPFoodReminder(reminders)
+    AddWeaponStoneReminders(reminders)
+    AddGatheringTrackingReminder(reminders)
+    AddSleepingBagReminder(reminders)
 
     return reminders
 end
@@ -1538,7 +1925,6 @@ local function UpdateDisplay(reminders)
         return
     end
 
-
     local totalWidth =
         (count * ICON_SIZE)
         + ((count - 1) * ICON_GAP)
@@ -1551,7 +1937,6 @@ local function UpdateDisplay(reminders)
     frame:Show()
 end
 
-
 -- ------------------------------------------------------------
 -- Public functions
 -- ------------------------------------------------------------
@@ -1561,6 +1946,9 @@ function Reminders:Refresh()
         or (
             not FL.db.reminders.enabled
             and not FL.db.reminders.xpFoodEnabled
+            and not FL.db.reminders.weaponStoneEnabled
+            and not FL.db.reminders.gatheringTrackingEnabled
+            and not FL.db.reminders.sleepingBagEnabled
         ) then
 
         frame:Hide()
@@ -1579,7 +1967,6 @@ function Reminders:Refresh()
         reminders
     )
 end
-
 
 function Reminders:SetUnlocked(value)
     unlocked = value
@@ -1610,6 +1997,11 @@ function Reminders:RefreshXPFoodState()
     self:Refresh()
 end
 
+function Reminders:RefreshWeaponStoneState()
+    UpdateWeaponStoneBagState()
+    self:Refresh()
+end
+
 function Reminders:ResetPosition()
     if not FL.db then
         return
@@ -1623,7 +2015,6 @@ function Reminders:ResetPosition()
     ApplySavedPosition()
 end
 
-
 -- ------------------------------------------------------------
 -- Events
 -- ------------------------------------------------------------
@@ -1634,6 +2025,26 @@ local eventFrame =
 
 eventFrame:RegisterEvent(
     "PLAYER_ENTERING_WORLD"
+)
+
+eventFrame:RegisterEvent(
+    "TOOLTIP_DATA_UPDATE"
+)
+
+eventFrame:RegisterEvent(
+    "WEAPON_ENCHANT_CHANGED"
+)
+
+eventFrame:RegisterEvent(
+    "MINIMAP_UPDATE_TRACKING"
+)
+
+eventFrame:RegisterEvent(
+    "PLAYER_ALIVE"
+)
+
+eventFrame:RegisterEvent(
+    "PLAYER_UNGHOST"
 )
 
 eventFrame:RegisterEvent(
@@ -1699,23 +2110,35 @@ eventFrame:SetScript(
         if event == "PLAYER_ENTERING_WORLD" then
             ApplySavedPosition()
             UpdateXPFoodBagState()
+            UpdateWeaponStoneBagState()
 
             Reminders:Refresh()
-
 
         elseif event == "BAG_UPDATE_DELAYED" then
             UpdateXPFoodBagState()
+            UpdateWeaponStoneBagState()
             Reminders:Refresh()
 
+        elseif event == "TOOLTIP_DATA_UPDATE" then
+            local dataInstanceID = ...
+
+            if dataInstanceID
+                and pendingXPFoodTooltips[
+                    dataInstanceID
+                ] then
+
+                UpdateXPFoodBagState()
+                Reminders:Refresh()
+            end
 
         elseif event == "PLAYER_LEVEL_UP" then
             C_Timer.After(
                 0,
                 function()
+                    UpdateWeaponStoneBagState()
                     Reminders:Refresh()
                 end
             )
-
 
         elseif event == "PLAYER_CONTROL_LOST" then
             -- Cancel any pending post-flight refresh.

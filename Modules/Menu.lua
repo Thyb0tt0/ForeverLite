@@ -714,6 +714,41 @@ local xpFoodReminderCheckbox =
         end
     )
 
+
+local weaponStoneReminderCheckbox =
+    AddCheckboxRow(
+        "Show missing weapon stone reminder",
+        function(value)
+            SetSetting(
+                "ForeverLite_WeaponStoneEnabled",
+                value
+            )
+        end
+    )
+
+
+local gatheringTrackingReminderCheckbox =
+    AddCheckboxRow(
+        "Show missing gathering tracking reminder",
+        function(value)
+            SetSetting(
+                "ForeverLite_GatheringTrackingEnabled",
+                value
+            )
+        end
+    )
+
+local sleepingBagReminderCheckbox =
+    AddCheckboxRow(
+        "Show sleeping bag reminder",
+        function(value)
+            SetSetting(
+                "ForeverLite_SleepingBagEnabled",
+                value
+            )
+        end
+    )
+
 -- ------------------------------------------------------------
 -- Dynamic frame height
 -- ------------------------------------------------------------
@@ -866,6 +901,18 @@ function Menu:Refresh()
 
     xpFoodReminderCheckbox:SetChecked(
         FL.db.reminders.xpFoodEnabled
+    )
+
+    sleepingBagReminderCheckbox:SetChecked(
+        FL.db.reminders.sleepingBagEnabled
+    )
+
+    weaponStoneReminderCheckbox:SetChecked(
+        FL.db.reminders.weaponStoneEnabled
+    )
+
+    gatheringTrackingReminderCheckbox:SetChecked(
+        FL.db.reminders.gatheringTrackingEnabled
     )
 
     healthFormatDropdown:GenerateMenu()

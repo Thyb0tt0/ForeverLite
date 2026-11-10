@@ -334,6 +334,94 @@ function FL:InitializeSettings()
     )
 
 
+    -- --------------------------------------------------------
+    -- Weapon Stones
+    -- --------------------------------------------------------
+
+    local weaponStoneSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_WeaponStoneEnabled",
+            "weaponStoneEnabled",
+            FL.db.reminders,
+            Settings.VarType.Boolean,
+            "Show missing weapon stone reminder",
+            false
+        )
+
+    weaponStoneSetting:SetValueChangedCallback(
+        function()
+            if FL.Reminders then
+                FL.Reminders:RefreshWeaponStoneState()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        weaponStoneSetting,
+        "Reminds you to use sharpening stones or weightstones on compatible weapons."
+    )
+
+
+    -- --------------------------------------------------------
+    -- Gathering Tracking
+    -- --------------------------------------------------------
+
+    local gatheringTrackingSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_GatheringTrackingEnabled",
+            "gatheringTrackingEnabled",
+            FL.db.reminders,
+            Settings.VarType.Boolean,
+            "Show missing gathering tracking reminder",
+            false
+        )
+
+    gatheringTrackingSetting:SetValueChangedCallback(
+        function()
+            if FL.Reminders then
+                FL.Reminders:Refresh()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        gatheringTrackingSetting,
+        "Reminds you when neither Find Minerals nor Find Herbs is active."
+    )
+
+    -- --------------------------------------------------------
+    -- Sleeping Bag
+    -- --------------------------------------------------------
+
+    local sleepingBagSetting =
+        Settings.RegisterAddOnSetting(
+            category,
+            "ForeverLite_SleepingBagEnabled",
+            "sleepingBagEnabled",
+            FL.db.reminders,
+            Settings.VarType.Boolean,
+            "Show sleeping bag reminder",
+            false
+        )
+
+    sleepingBagSetting:SetValueChangedCallback(
+        function()
+            if FL.Reminders then
+                FL.Reminders:Refresh()
+            end
+        end
+    )
+
+    Settings.CreateCheckbox(
+        category,
+        sleepingBagSetting,
+        "Reminds you until you have all 3 stacks of Well-Rested."
+    )
+
     Settings.RegisterAddOnCategory(category)
 end
 

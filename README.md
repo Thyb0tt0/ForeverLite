@@ -51,6 +51,17 @@ Hunter pet reminders distinguish between a missing pet and a dead pet. Warlock p
 
 Reminders are intentionally conservative and avoid effects that are heavily role-, target-, or situation-dependent.
 
+### Additional Reminders
+
+Optional reminders that work independently of class buff reminders:
+
+- XP food — Reminds you when qualifying XP food is available and Well Fed is missing.
+- Weapon stones — Reminds you to apply sharpening stones or weightstones to compatible weapons.
+- Gathering tracking — Reminds you when Find Herbs or Find Minerals is not active.
+- Sleeping bag — Reminds you until you have all 3 stacks of Well-Rested.
+
+All reminders are disabled by default.
+
 ## Commands
 
 Use `/fl help` in-game to show the available commands.
@@ -96,7 +107,7 @@ Most features are disabled by default.
 1. Download ForeverLite.
 2. Extract the `ForeverLite` folder into:
 
-   `World of Warcraft\_classic_beta_\Interface\AddOns\`
+   `World of Warcraft\_forever_\Interface\AddOns\`
 
 3. Restart WoW or reload the UI.
 

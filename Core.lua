@@ -109,6 +109,19 @@ local function InitializeDatabase()
         ForeverLiteDB.reminders.xpFoodEnabled = false
     end
 
+
+    if ForeverLiteDB.reminders.weaponStoneEnabled == nil then
+        ForeverLiteDB.reminders.weaponStoneEnabled = false
+    end
+
+    if ForeverLiteDB.reminders.gatheringTrackingEnabled == nil then
+        ForeverLiteDB.reminders.gatheringTrackingEnabled = false
+    end
+
+    if ForeverLiteDB.reminders.sleepingBagEnabled == nil then
+        ForeverLiteDB.reminders.sleepingBagEnabled = false
+    end
+
     if ForeverLiteDB.reminders.x == nil then
         ForeverLiteDB.reminders.x = 0
     end
@@ -269,7 +282,10 @@ SlashCmdList["FOREVERLITE"] = function(message)
 
     elseif message == "reminders unlock" then
         if not FL.db.reminders.enabled
-            and not FL.db.reminders.xpFoodEnabled then
+            and not FL.db.reminders.xpFoodEnabled
+            and not FL.db.reminders.weaponStoneEnabled
+            and not FL.db.reminders.gatheringTrackingEnabled
+            and not FL.db.reminders.sleepingBagEnabled then
 
             print(
                 "|cff33ff99ForeverLite|r: "
