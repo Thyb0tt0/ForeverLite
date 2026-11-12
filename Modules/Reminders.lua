@@ -23,8 +23,7 @@ local PET_REMINDER_GRACE_SECONDS = 2
 local petReminderGraceUntil = 0
 local petReminderTimerToken = 0
 
-local battleShoutExpiresAt = 0
-local battleShoutTimerToken = 0
+local battleShoutActive = nil
 
 local auraStateCache = {}
 local auraNameToCacheKey = {}
@@ -94,9 +93,6 @@ local BATTLE_SHOUT_SPELLS = {
     5242,  -- Rank 2
     6673,  -- Rank 1
 }
-
-local DEFAULT_BATTLE_SHOUT_DURATION = 180
-local battleShoutDuration = DEFAULT_BATTLE_SHOUT_DURATION
 
 local BATTLE_SHOUT_LOOKUP = {}
 
@@ -491,108 +487,24 @@ end
 -- ------------------------------------------------------------
 
 local function UpdateBattleShoutState()
-    local spellName =
-        C_Spell.GetSpellName(
-            6673
-        )
-
-    if not spellName then
-        battleShoutExpiresAt = 0
+    if C_Secrets.ShouldAurasBeSecret() then
         return
     end
 
+    local spellName =
+        C_Spell.GetSpellName(6673)
 
-    local aura =
+    if not spellName then
+        return
+    end
+
+    battleShoutActive =
         C_UnitAuras.GetAuraDataBySpellName(
             "player",
             spellName,
             "HELPFUL"
-        )
-
-    if not aura then
-        battleShoutExpiresAt = 0
-        return
-    end
-
-
-    local duration =
-        aura.duration
-
-    if duration
-        and (
-            not issecretvalue
-            or not issecretvalue(
-                duration
-            )
-        )
-        and type(duration) == "number"
-        and duration > 0 then
-
-        battleShoutDuration =
-            duration
-    end
-
-
-    local expirationTime =
-        aura.expirationTime
-
-    if expirationTime
-        and (
-            not issecretvalue
-            or not issecretvalue(
-                expirationTime
-            )
-        )
-        and type(expirationTime) == "number"
-        and expirationTime > 0 then
-
-        battleShoutExpiresAt =
-            expirationTime
-    else
-        -- Fallback if Forever does not expose the
-        -- expiration timestamp for some reason.
-        battleShoutExpiresAt =
-            GetTime()
-            + battleShoutDuration
-    end
+        ) ~= nil
 end
-
-
-local function ScheduleBattleShoutExpiry()
-    battleShoutTimerToken =
-        battleShoutTimerToken + 1
-
-    local timerToken =
-        battleShoutTimerToken
-
-    local delay =
-        battleShoutExpiresAt
-        - GetTime()
-
-    if delay <= 0 then
-        return
-    end
-
-
-    C_Timer.After(
-        delay + 0.05,
-        function()
-            if timerToken
-                ~= battleShoutTimerToken then
-
-                return
-            end
-
-            if UnitAffectingCombat(
-                "player"
-            ) then
-
-                Reminders:Refresh()
-            end
-        end
-    )
-end
-
 
 local function AddBattleShoutReminder(
     reminders
@@ -605,14 +517,11 @@ local function AddBattleShoutReminder(
     if not knownSpell then
         return
     end
-
-
-    if battleShoutExpiresAt
-        > GetTime() then
-
+    
+    -- Warn only when the buff was confirmed missing.
+    if battleShoutActive ~= false then
         return
     end
-
 
     local icon =
         C_Spell.GetSpellTexture(
@@ -1695,7 +1604,7 @@ local function GetMissingReminders()
             reminders,
             HUNTER_TRUESHOT_SPELLS,
             HUNTER_TRUESHOT_SPELLS,
-            "NO TRUESHOT"
+            "TRUESHOT!"
         )
 
 
@@ -1802,7 +1711,7 @@ local function GetMissingReminders()
                 25894, -- Greater Wisdom
                 25898, -- Greater Kings
             },
-            "NO BLESSING"
+            "BLESSING!"
         )
 
     elseif class == "SHAMAN" then
@@ -2157,20 +2066,10 @@ eventFrame:SetScript(
         elseif event == "PLAYER_CONTROL_GAINED" then
             StartPetReminderGrace()
 
-
-        elseif event == "PLAYER_REGEN_DISABLED" then
-            ScheduleBattleShoutExpiry()
-
-            Reminders:Refresh()
-
-
-        elseif event == "PLAYER_REGEN_ENABLED" then
-            -- Invalidate any pending combat expiry timer.
-            battleShoutTimerToken =
-                battleShoutTimerToken + 1
+        elseif event == "PLAYER_REGEN_DISABLED"
+            or event == "PLAYER_REGEN_ENABLED" then
 
             Reminders:Refresh()
-
 
         elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
             local unit, _, spellID = ...
@@ -2189,19 +2088,9 @@ eventFrame:SetScript(
                 end
 
                 if BATTLE_SHOUT_LOOKUP[spellID] then
-                    battleShoutExpiresAt =
-                        GetTime()
-                        + battleShoutDuration
-
-                    if UnitAffectingCombat(
-                        "player"
-                    ) then
-                        ScheduleBattleShoutExpiry()
-                    end
-
+                    battleShoutActive = true
                     shouldRefresh = true
                 end
-
 
                 local spellName =
                     C_Spell.GetSpellName(
@@ -2212,11 +2101,14 @@ eventFrame:SetScript(
                     spellName
                     and auraNameToCacheKey[spellName]
 
-                if cacheKey then
+                -- Only assume the player received buffs
+                -- whose effects are exclusive to the caster.
+                if cacheKey
+                    and C_Spell.IsSelfBuff(spellID) then
+
                     auraStateCache[cacheKey] = true
                     shouldRefresh = true
                 end
-
 
                 if shouldRefresh then
                     Reminders:Refresh()

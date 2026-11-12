@@ -603,13 +603,11 @@ healthPositionDropdown:SetupMenu(
     end
 )
 
-
 -- ------------------------------------------------------------
 -- Experience
 -- ------------------------------------------------------------
 
 AddSection("Experience")
-
 
 local experienceCheckbox =
     AddCheckboxRow(
@@ -622,7 +620,6 @@ local experienceCheckbox =
         end
     )
 
-
 local xpBarTextCheckbox =
     AddCheckboxRow(
         "Always show XP bar text",
@@ -633,7 +630,6 @@ local xpBarTextCheckbox =
             )
         end
     )
-
 
 -- ------------------------------------------------------------
 -- Vendor
@@ -693,7 +689,7 @@ AddSection("Reminders")
 
 local remindersCheckbox =
     AddCheckboxRow(
-        "Show missing buff reminders",
+        "Class buff reminder",
         function(value)
             SetSetting(
                 "ForeverLite_RemindersEnabled",
@@ -705,7 +701,7 @@ local remindersCheckbox =
 
 local xpFoodReminderCheckbox =
     AddCheckboxRow(
-        "Show missing XP food reminder",
+        "XP food reminder",
         function(value)
             SetSetting(
                 "ForeverLite_XPFoodReminderEnabled",
@@ -714,22 +710,9 @@ local xpFoodReminderCheckbox =
         end
     )
 
-
-local weaponStoneReminderCheckbox =
-    AddCheckboxRow(
-        "Show missing weapon stone reminder",
-        function(value)
-            SetSetting(
-                "ForeverLite_WeaponStoneEnabled",
-                value
-            )
-        end
-    )
-
-
 local gatheringTrackingReminderCheckbox =
     AddCheckboxRow(
-        "Show missing gathering tracking reminder",
+        "Gathering tracking reminder",
         function(value)
             SetSetting(
                 "ForeverLite_GatheringTrackingEnabled",
@@ -738,9 +721,20 @@ local gatheringTrackingReminderCheckbox =
         end
     )
 
+local weaponStoneReminderCheckbox =
+    AddCheckboxRow(
+        "Weapon stone reminder",
+        function(value)
+            SetSetting(
+                "ForeverLite_WeaponStoneEnabled",
+                value
+            )
+        end
+    )
+
 local sleepingBagReminderCheckbox =
     AddCheckboxRow(
-        "Show sleeping bag reminder",
+        "Sleeping bag reminder",
         function(value)
             SetSetting(
                 "ForeverLite_SleepingBagEnabled",
