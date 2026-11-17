@@ -1046,7 +1046,8 @@ local function UpdateXPFoodBagState()
     wipe(pendingXPFoodTooltips)
 
     if not FL.db
-        or not FL.db.reminders.xpFoodEnabled then
+        or not FL.db.reminders.xpFoodEnabled
+        or UnitLevel("player") >= 60 then
 
         return
     end
@@ -1130,7 +1131,8 @@ local function UpdateWeaponStoneBagState()
 end
 
 local function AddXPFoodReminder(reminders)
-    if not FL.db.reminders.xpFoodEnabled then
+    -- XP food is irrelevant at max level.
+    if UnitLevel("player") >= 60 then
         return
     end
 

@@ -94,12 +94,16 @@ local updateAccumulator = 0
 local unlocked = false
 
 local function CanTrackExperience()
+    -- Hide the XP tracker at level 60.
+    if UnitLevel("player") >= 60 then
+        return false
+    end
+
     local maxXP = UnitXPMax("player")
 
     return maxXP
         and maxXP > 0
 end
-
 
 -- ------------------------------------------------------------
 -- Position
