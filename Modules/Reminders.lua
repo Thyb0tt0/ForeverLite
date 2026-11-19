@@ -590,8 +590,12 @@ local function WeaponNeedsTemporaryEnchant(
     )
 end
 
-
 local function AddRogueReminder(reminders)
+    -- Hide poison reminders in resting areas.
+    if IsResting() then
+        return
+    end
+
     local POISONS_SPELL_ID = 2842
 
     if not C_SpellBook.IsSpellKnown(
@@ -1130,9 +1134,12 @@ local function UpdateWeaponStoneBagState()
     end
 end
 
+
 local function AddXPFoodReminder(reminders)
-    -- XP food is irrelevant at max level.
-    if UnitLevel("player") >= 60 then
+    -- Hide XP food reminders in resting areas
+    -- and at max level.
+    if IsResting()
+        or UnitLevel("player") >= 60 then
         return
     end
 
@@ -1262,13 +1269,15 @@ local function GetMissingWeaponStoneIcon(
     return icon
 end
 
-
 local function AddWeaponStoneReminders(reminders)
     if not FL.db.reminders.weaponStoneEnabled then
         return
     end
 
-    if UnitAffectingCombat("player")
+    -- Hide weapon stone reminders in resting areas,
+    -- during combat, or while flying.
+    if IsResting()
+        or UnitAffectingCombat("player")
         or UnitOnTaxi("player") then
         return
     end
@@ -1589,6 +1598,23 @@ local function GetMissingReminders()
             "BUFF!"
         )
 
+        -- Keep Thorns active.
+        -- Any rank satisfies the reminder.
+        AddSpellReminder(
+            reminders,
+            {
+                9910, -- Rank 6
+                9756, -- Rank 5
+                8914, -- Rank 4
+                1075, -- Rank 3
+                782,  -- Rank 2
+                467,  -- Rank 1
+            },
+            {
+                467,  -- Thorns (all ranks share the name)
+            },
+            "THORNS!"
+        )
 
     elseif class == "HUNTER" then
 
@@ -1936,6 +1962,10 @@ local eventFrame =
 
 eventFrame:RegisterEvent(
     "PLAYER_ENTERING_WORLD"
+)
+
+eventFrame:RegisterEvent(
+    "PLAYER_UPDATE_RESTING"
 )
 
 eventFrame:RegisterEvent(
